@@ -230,8 +230,8 @@ export async function startScraper() {
 
     const baseQueries = [
       { name: 'Quest 3S', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=Quest+3S' },
-      { name: 'Quest 2', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=Quest+2' },
-      { name: 'PCVR', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=PCVR' },
+      { name: 'VR Meta Quest', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=VR+Meta+Quest' },
+      { name: 'Quest 3', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=Quest+3' },
     ];
 
     // Build the HTTP session from saved cookies once
