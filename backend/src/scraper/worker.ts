@@ -159,17 +159,10 @@ async function translateGame(title: string, description: string) {
   let translated_title = null;
 
   try {
-    // 1. Filter description: remove everything after "3)"
-    let filtered_desc = description;
-    const splitIndex = description.indexOf('3)');
-    if (splitIndex !== -1) {
-      filtered_desc = description.substring(0, splitIndex + 2).trim();
-    }
+    // 1. Translate description
+    translated_description = await translateText(description, 'pt');
 
-    // 2. Translate description
-    translated_description = await translateText(filtered_desc, 'pt');
-
-    // 3. Translate title (including the bracketed categories)
+    // 2. Translate title (including the bracketed categories)
     translated_title = await translateText(title, 'pt');
   } catch (err) {
     console.log(`[!] Translation failed for ${title}.`);
@@ -183,7 +176,7 @@ async function translateGame(title: string, description: string) {
   let languages = description.match(/Языки:\s*([^\n]+)/i)?.[1].trim();
   let play_modes = description.match(/Поддерживаемые игровые режимы:\s*([^\n]+)/i)?.[1].trim();
 
-  // 4. Translate metadata fields (they are short, so this is fast)
+  // 3. Translate metadata fields (they are short, so this is fast)
   try {
     if (genre) genre = await translateText(genre, 'pt');
     if (developer && developer !== 'Mikalai Kazei' && developer !== 'Unknown') developer = await translateText(developer, 'pt');
@@ -229,6 +222,7 @@ export async function startScraper() {
     const db = getDb();
 
     const baseQueries = [
+      { name: 'Oculos Quests games', url: 'https://rutracker.me/forum/tracker.php?f=2420' },
       { name: 'Quest 3S', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=Quest+3S' },
       { name: 'VR Meta Quest', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=VR+Meta+Quest' },
       { name: 'Quest 3', url: 'https://rutracker.me/forum/tracker.php?f=2420&nm=Quest+3' },
