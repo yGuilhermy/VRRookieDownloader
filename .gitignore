@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Build outputs
+dist/
+backend/dist/
+build/
+
+# SQLite Database
+backend/data/*
+!backend/data/.gitkeep
+*.db
+*.sqlite
+
+# Environment variables
+.env
+.env.local
+
+# Puppeteer / Scraper items
+backend/src/scraper/temp/*
+!backend/src/scraper/temp/.gitkeep
+.cache/
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor-specific
+.vscode/
+.idea/
+*.swp
+*.swo
