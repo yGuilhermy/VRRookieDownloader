@@ -187,6 +187,18 @@
   border-radius: 10px;
 }
 
+/* Hide Spin Buttons from Number Inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 
 /* Hide Next.js Dev Overlay */
 nextjs-portal {

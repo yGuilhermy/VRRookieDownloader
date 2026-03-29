@@ -38,6 +38,7 @@ O **VR Rookie Downloader** é uma ferramenta de indexação técnica. É imperat
 
 - Extração de **Gênero**, **Versão**, **Desenvolvedor** e estatísticas de **Seeds/Leechers**.
 - Tradução automática de títulos e descrições para Português.
+- **Interface Otimizada:** Botão para ocultar/mostrar a barra lateral de filtros para focar na visualização dos jogos.
 
 ### Gestão de Downloads
 

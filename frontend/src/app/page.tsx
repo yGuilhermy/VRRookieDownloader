@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Search, HardDriveDownload, ImageOff, ChevronLeft, ChevronRight, Heart, RefreshCw, Filter, Globe, Languages, Activity, Folder, LayoutDashboard, Users, Zap, SortAsc, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Search, HardDriveDownload, ImageOff, ChevronLeft, ChevronRight, Heart, RefreshCw, Filter, Globe, Languages, Activity, Folder, LayoutDashboard, Users, Zap, SortAsc, CheckCircle2, AlertCircle, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
@@ -42,6 +42,9 @@ export default function Home() {
   const [manualIndexFolder, setManualIndexFolder] = useState<string | null>(null);
   const [manualGameId, setManualGameId] = useState('');
   const [isManualIndexOpen, setIsManualIndexOpen] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [limit, setLimit] = useState(20);
+  const [showAllGenres, setShowAllGenres] = useState(false);
   
   const { offlineMode, downloadPath, setDownloadPath } = useStore();
   const queryClient = useQueryClient();
@@ -71,14 +74,14 @@ export default function Home() {
   }, [queryClient]);
 
   const { data, isLoading, isError } = useQuery<{ games: Game[], pages: number, total: number }>({
-    queryKey: ['games', page, search, typeFilter, sort, genreFilter, devFilter],
+    queryKey: ['games', page, search, typeFilter, sort, genreFilter, devFilter, limit],
     queryFn: async () => {
       const res = await api.get('/games', {
         params: { 
           page, 
           q: search, 
           type: typeFilter, 
-          limit: 20, 
+          limit, 
           path: downloadPath,
           sort,
           genre: genreFilter,
@@ -224,12 +227,12 @@ export default function Home() {
 
   useEffect(() => {
     setPage(1);
-  }, [search, typeFilter, sort, genreFilter, devFilter]);
+  }, [search, typeFilter, sort, genreFilter, devFilter, limit]);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className={`flex flex-col lg:flex-row ${showSidebar ? 'gap-8' : 'gap-0'} transition-all duration-300 relative`}>
       {/* Sidebar Filters */}
-      <aside className="w-full lg:w-72 space-y-6 shrink-0">
+      <aside className={`${showSidebar ? 'w-full lg:w-72 opacity-100 mb-6 lg:mb-0' : 'w-0 h-0 overflow-hidden opacity-0 lg:w-0'} transition-all duration-300 ease-in-out space-y-6 shrink-0`}>
         <div className="sticky top-20 space-y-6">
           <div className="space-y-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
@@ -320,7 +323,7 @@ export default function Home() {
               >
                 Todos
               </Badge>
-              {filters.genres.slice(0, 15).map(genre => (
+              {filters.genres.slice(0, showAllGenres ? undefined : 15).map(genre => (
                 <Badge 
                   key={genre}
                   variant={genreFilter === genre ? 'default' : 'secondary'}
@@ -330,6 +333,16 @@ export default function Home() {
                   {genre}
                 </Badge>
               ))}
+              {filters.genres.length > 15 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full text-[10px] h-8 text-primary hover:bg-primary/5 mt-2"
+                  onClick={() => setShowAllGenres(!showAllGenres)}
+                >
+                  {showAllGenres ? 'Ver Menos -' : `Ver Mais (${filters.genres.length - 15})+`}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -380,6 +393,17 @@ export default function Home() {
           </div>
           
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-primary/20 hover:bg-primary/5 flex"
+              onClick={() => setShowSidebar(!showSidebar)}
+              title={showSidebar ? "Ocultar Filtros" : "Mostrar Filtros"}
+            >
+              {showSidebar ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+              <span className="hidden sm:inline">{showSidebar ? "Ocultar" : "Mostrar Filtros"}</span>
+            </Button>
+            
             {typeFilter === 'baixados' && (
               <Button 
                 variant="outline" 
@@ -612,27 +636,72 @@ export default function Home() {
           ))}
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-8">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-medium px-4">
-              Página {page} de {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+        {/* Pagination and Items Per Page */}
+        {(totalPages > 1 || totalItems > 10) && (
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-12 border-t border-border/20">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <span className="text-sm font-medium text-muted-foreground mr-2">Itens por página:</span>
+              <div className="flex gap-2">
+                {[10, 20, 50, 100].map((v) => (
+                  <Button
+                    key={v}
+                    variant={limit === v ? 'default' : 'outline'}
+                    size="sm"
+                    className="w-10 h-10 p-0 rounded-full"
+                    onClick={() => setLimit(v)}
+                  >
+                    {v}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 ml-2">
+                <Input
+                  type="number"
+                  className="w-24 bg-card/40 border-border/50 h-10 text-center placeholder:text-muted-foreground/30 px-2"
+                  placeholder="Custom"
+                  min={1}
+                  max={500}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (val > 0) setLimit(val);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = parseInt((e.target as HTMLInputElement).value);
+                      if (val > 0) setLimit(val);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex items-center bg-card/50 px-4 py-2 rounded-full border border-border/50 min-w-32 justify-center">
+                  <span className="text-sm font-bold">
+                    Página {page} de {totalPages}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
