@@ -280,7 +280,7 @@
       "confirm": "Delete Everything and Replace"
     },
     "rebuildAll": {
-      "button": "Rebuild All (Translation)",
+      "button": "Rebuild Translation",
       "confirm": "This will re-scrape ALL games in the database to update translations to {{lang}}. This may take a long time and depends on your internet/session. Continue?",
       "success": "Full rebuild started in background."
     }

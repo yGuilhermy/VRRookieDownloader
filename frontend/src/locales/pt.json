@@ -280,7 +280,7 @@
       "confirm": "Apagar Tudo e Substituir"
     },
     "rebuildAll": {
-      "button": "Reconstruir Tudo (Tradução)",
+      "button": "Reconstruir Tradução",
       "confirm": "Isso vai re-scrapear TODOS os jogos no banco para atualizar as traduções para {{lang}}. Pode demorar e depende da internet/sessão. Continuar?",
       "success": "Reconstrução total iniciada em segundo plano."
     }

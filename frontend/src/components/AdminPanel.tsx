@@ -219,7 +219,7 @@ export default function AdminPanel() {
         </div>
       </CardContent>
 
-      <CardFooter className="bg-muted/20 border-t border-border/50 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <CardFooter className="bg-muted/20 border-t border-border/50 pt-4 flex flex-row flex-wrap justify-between items-center gap-4">
         <span className="text-sm text-muted-foreground mr-auto">{t('admin.table.total')}: {games.length}</span>
         
         <div className="flex flex-wrap items-center gap-2">
