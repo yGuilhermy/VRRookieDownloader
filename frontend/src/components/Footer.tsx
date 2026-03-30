@@ -99,6 +99,17 @@ export default function Footer() {
                   <span>Powered by ADB</span>
                 </a>
               </li>
+              <li>
+                <a 
+                  href="https://github.com/yGuilhermy/VRRookieDownloader" 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="flex items-center gap-2 hover:text-primary transition-colors"
+                >
+                  <Activity className="h-3 w-3" /> 
+                  <span>Fase Beta!</span>
+                </a>
+              </li>
             </ul>
           </div>
         </div>

@@ -524,9 +524,9 @@ export default function Home() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredGames.map((game) => (
-            <Link href={`/game/${game.id}`} key={game.id} className="group">
-              <Card className="h-full overflow-hidden flex flex-col hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1.5 bg-card/40 backdrop-blur-md border-border/40 p-0 gap-0 rounded-3xl group">
-                <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden">
+            <Link href={`/game/${game.id}`} key={game.id} className="group h-full">
+              <Card className="h-full overflow-hidden flex flex-col hover:border-primary/40 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 bg-card/40 backdrop-blur-md border-border/40 rounded-2xl group">
+                <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden border-b border-border/10">
                   {game.image_url ? (
                     <img
                       src={game.image_url}
@@ -618,10 +618,15 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <CardContent className="p-4 pt-5 pb-3 flex-1 flex flex-col min-h-fit">
-                  <CardTitle className="text-base font-bold line-clamp-2 leading-tight tracking-tight group-hover:text-primary transition-colors duration-300">
+                <CardContent className="p-4 flex-1 flex flex-col justify-start gap-1">
+                  <CardTitle className="text-sm font-bold line-clamp-2 leading-tight tracking-tight group-hover:text-primary transition-colors duration-300 uppercase">
                     {cleanTitle(game)}
                   </CardTitle>
+                  {game.isLocalDownload && (
+                    <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="h-2.5 w-2.5" /> Instalado
+                    </p>
+                  )}
                 </CardContent>
                 
                 <CardFooter className="px-5 py-3 text-[11px] font-black text-muted-foreground/50 flex justify-between items-center border-t border-white/5 bg-white/[0.02] mt-auto">

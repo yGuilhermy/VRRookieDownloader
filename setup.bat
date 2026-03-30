@@ -56,6 +56,41 @@ if %errorlevel% neq 0 (
     echo OK! ADB detectado.
 )
 
+echo.
+echo [!] Verificando qBitTorrent...
+where qbittorrent >nul 2>nul
+if %errorlevel% neq 0 (
+    if exist "C:\Program Files\qBittorrent\qbittorrent.exe" (
+        echo OK! qBitTorrent encontrado em C:\Program Files\qBittorrent.
+    ) else (
+        echo [!] qBitTorrent nao detectado no sistema.
+        echo Tentando instalar via Winget (Windows Package Manager)...
+        
+        winget --version >nul 2>nul
+        if %errorlevel% == 0 (
+            echo [1/2] Iniciando instalacao silenciosa via Winget...
+            winget install --id qBittorrent.qBittorrent --silent --accept-package-agreements --accept-source-agreements
+            if %errorlevel% == 0 (
+                echo [2/2] qBitTorrent instalado com sucesso!
+            ) else (
+                echo [!] Falha na instalacao via Winget. Tentando download direto...
+                goto :manual_qbit
+            )
+        ) else (
+            :manual_qbit
+            echo [1/2] Baixando instalador do qBitTorrent...
+            powershell -Command "Invoke-WebRequest -Uri 'https://managedway.dl.sourceforge.net/project/qbittorrent/qbittorrent-win32/qbittorrent-4.6.3/qbittorrent_4.6.3_x64_setup.exe' -OutFile 'qbit_setup.exe'"
+            echo [2/2] Executando instalador (isso pode levar alguns minutos)...
+            start /wait qbit_setup.exe /S
+            del /f /q qbit_setup.exe
+            echo [✓] qBitTorrent instalado com sucesso!
+        )
+    )
+) else (
+    echo OK! qBitTorrent detectado no PATH.
+)
+echo.
+
 echo [1/4] Verificando dependencias da Raiz...
 if not exist node_modules (
     echo Instalando...

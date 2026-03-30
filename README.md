@@ -67,8 +67,13 @@ O **VR Rookie Downloader** é uma ferramenta de indexação técnica. É imperat
 ### 1. Requisitos do Sistema
 
 - **[Node.js](https://nodejs.org/):** Versão 18.x ou superior.
-- **[qBitTorrent](https://www.qbittorrent.org/):** Habilitar a **Web UI** nas configurações do programa (porta 8080 recomendada).
-  - _Credenciais Padrão:_ Usuário `admin` / Senha `adminadmin` (pode variar conforme a versão).
+- **[qBitTorrent](https://www.qbittorrent.org/):** É necessário configurar a **Web UI** para que o app possa gerenciar os downloads:
+  1. Abra o qBitTorrent e vá em `Ferramentas` -> `Opções` -> `Web UI`.
+  2. Marque a caixa **Interface de Usuário da Web (Controle Remoto)**.
+  3. No campo **Endereço IP**, use `127.0.0.1` e na **Porta**, use `8080` (padrão do projeto).
+  4. Em **Autenticação**, verifique se o usuário é `admin`.
+  5. **Senha:** O projeto está configurado para usar a senha padrão `adminadmin`. Caso deseje usar outra, você precisará atualizar a função `loginQbit` no arquivo `backend/src/index.ts`.
+  6. (Opcional) Marque **Ignorar autenticação para clientes no host local** para simplificar a conexão.
 - **[ADB (Android Debug Bridge)](https://developer.android.com/tools/adb):** O binário `adb` **DEVE** estar configurado no **PATH** do sistema operacional.
 
 ### 2. Configuração do Ambiente

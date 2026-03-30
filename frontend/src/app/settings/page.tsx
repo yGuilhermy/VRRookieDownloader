@@ -168,7 +168,7 @@ export default function Settings() {
           <CardContent>
             <div className="flex gap-4">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="download-path">Caminho da Pasta (Windows ou Linux)</Label>
+                <Label htmlFor="download-path">Caminho da Pasta</Label>
                 <div className="flex gap-2">
                   <Input 
                     id="download-path" 
