@@ -80,20 +80,35 @@ app.use(express.json());
 const CONFIG_FILE = path.join(process.cwd(), 'config.json');
 
 function loadSettings() {
+  const defaults = { 
+    downloadPath: 'E:\\VRGames', 
+    translationLanguage: 'pt',
+    interfaceLanguage: 'en',
+    offlineMode: false
+  };
+
   if (fs.existsSync(CONFIG_FILE)) {
     try {
-      return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-    } catch { return { downloadPath: 'E:\\VRGames', translationLanguage: 'pt' }; }
+      const saved = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+      return { ...defaults, ...saved };
+    } catch { 
+      return defaults; 
+    }
   }
-  return { downloadPath: 'E:\\VRGames', translationLanguage: 'pt' };
+  return defaults;
 }
 
 function saveSettings(settings: any) {
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(settings, null, 2));
+  const current = loadSettings();
+  const updated = { ...current, ...settings };
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(updated, null, 2));
 }
 
-let globalDownloadPath = loadSettings().downloadPath;
-let globalTranslationLanguage = loadSettings().translationLanguage || 'pt';
+let settings = loadSettings();
+let globalDownloadPath = settings.downloadPath;
+let globalTranslationLanguage = settings.translationLanguage;
+let globalInterfaceLanguage = settings.interfaceLanguage;
+let globalOfflineMode = settings.offlineMode;
 
 export function getTranslationLanguage() {
   return globalTranslationLanguage;
@@ -1205,6 +1220,24 @@ app.post('/api/adb/install', async (req, res) => {
     console.error(`[ADB] Install error: ${err.message}`);
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get('/api/settings', (req, res) => {
+  res.json(loadSettings());
+});
+
+app.post('/api/settings', (req, res) => {
+  const newSettings = req.body;
+  saveSettings(newSettings);
+  
+  // Atualiza as variáveis globais em runtime
+  const updated = loadSettings();
+  if (updated.downloadPath) globalDownloadPath = updated.downloadPath;
+  if (updated.translationLanguage) globalTranslationLanguage = updated.translationLanguage;
+  if (updated.interfaceLanguage) globalInterfaceLanguage = updated.interfaceLanguage;
+  if (updated.offlineMode !== undefined) globalOfflineMode = updated.offlineMode;
+
+  res.json({ success: true, settings: updated });
 });
 
 const PORT = Number(process.env.PORT) || 4000;

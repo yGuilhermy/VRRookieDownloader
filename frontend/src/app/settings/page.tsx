@@ -47,7 +47,13 @@ export default function Settings() {
     if (settings?.translationLanguage) {
       setTranslationLanguage(settings.translationLanguage);
     }
-  }, [settings, setDownloadPath, setTranslationLanguage]);
+    if (settings?.interfaceLanguage) {
+      setInterfaceLanguage(settings.interfaceLanguage);
+    }
+    if (settings?.offlineMode !== undefined) {
+      setOfflineMode(settings.offlineMode);
+    }
+  }, [settings, setDownloadPath, setTranslationLanguage, setInterfaceLanguage, setOfflineMode]);
 
   const { data: scraperStatus, refetch: refetchScraper } = useQuery<{
     isRunning: boolean;
@@ -86,8 +92,11 @@ export default function Settings() {
   });
   
   const saveSettings = useMutation({
-    mutationFn: (data: { downloadPath?: string, translationLanguage?: string }) => api.post('/settings', data),
-    onSuccess: () => toast.success('Configurações sincronizadas!'),
+    mutationFn: (data: { downloadPath?: string, translationLanguage?: string, interfaceLanguage?: string, offlineMode?: boolean }) => api.post('/settings', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      toast.success('Configurações sincronizadas!');
+    },
     onError: (err: any) => toast.error(err.response?.data?.error || 'Erro ao sincronizar'),
   });
 
@@ -98,6 +107,16 @@ export default function Settings() {
   const handleTranslationLanguageChange = (val: string) => {
     setTranslationLanguage(val);
     saveSettings.mutate({ translationLanguage: val });
+  };
+
+  const handleInterfaceLanguageChange = (val: 'pt' | 'en') => {
+    setInterfaceLanguage(val);
+    saveSettings.mutate({ interfaceLanguage: val });
+  };
+
+  const handleOfflineModeChange = (val: boolean) => {
+    setOfflineMode(val);
+    saveSettings.mutate({ offlineMode: val });
   };
 
   return (
@@ -120,7 +139,7 @@ export default function Settings() {
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex-1 space-y-2">
                 <Label>{t('settings.language.interface.label')}</Label>
-                <Select value={interfaceLanguage} onValueChange={(val: any) => setInterfaceLanguage(val)}>
+                <Select value={interfaceLanguage} onValueChange={handleInterfaceLanguageChange}>
                   <SelectTrigger className="w-full bg-background">
                     <SelectValue />
                   </SelectTrigger>
@@ -208,12 +227,12 @@ export default function Settings() {
             <Label htmlFor="offline-mode" className="text-base font-medium cursor-pointer">
               {t('settings.offlineMode.label')}
             </Label>
-            <Switch
-              id="offline-mode"
-              checked={offlineMode}
-              onCheckedChange={setOfflineMode}
-              className="data-[state=checked]:bg-amber-500"
-            />
+              <Switch
+                id="offline-mode"
+                checked={offlineMode}
+                onCheckedChange={handleOfflineModeChange}
+                className="data-[state=checked]:bg-amber-500"
+              />
           </CardContent>
           <CardFooter>
             <p className="text-sm text-muted-foreground">
