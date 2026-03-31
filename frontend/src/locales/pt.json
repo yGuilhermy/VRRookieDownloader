@@ -109,7 +109,8 @@
       "downloaded": "BAIXADO",
       "predownload": "PREDOWNLOAD",
       "downloading": "BAIXANDO",
-      "installed": "Instalado"
+      "installed": "Instalado",
+      "error": "Erro ao carregar jogos. Verifique se o backend está executando."
     },
     "folders": {
       "title": "Arquivos Físicos no HD",
@@ -117,7 +118,17 @@
       "noFolders": "Nenhuma pasta encontrada neste diretório.",
       "checkSettings": "Verifique se o caminho está correto nas Configurações",
       "indexed": "Indexado",
-      "clickToIndex": "Clique para indexar"
+      "clickToIndex": "Clique para indexar",
+      "removeConfirm": "Deseja remover a indexação desta pasta?\n\nIsso desconectará a pasta do jogo na Biblioteca, mas o jogo NÃO será excluído do seu PC.",
+      "searchGame": "Pesquisar Jogo (Nome)",
+      "searchHint": "Ex: Beat Saber...",
+      "noResults": "Nenhum resultado encontrado.",
+      "manualIdHint": "Ou insira o ID manualmente",
+      "indexedMessage": "Esta pasta já está vinculada ao jogo ID {{id}}. Dê um clique duplo para desindexar.",
+      "removeSuccess": "Indexação removida com sucesso!",
+      "noApk": "Nenhum arquivo APK detectado nesta pasta.",
+      "scanSuccess": "Status: Encontradas correspondências para {{count}} itens.",
+      "indexedWithId": "Indexado - ID {{id}}"
     },
     "pagination": {
       "itemsPerPage": "Itens por página:",

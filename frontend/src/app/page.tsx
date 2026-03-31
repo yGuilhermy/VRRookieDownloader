@@ -44,6 +44,7 @@ export default function Home() {
   const [showFolders, setShowFolders] = useState(false);
   const [manualIndexFolder, setManualIndexFolder] = useState<string | null>(null);
   const [manualGameId, setManualGameId] = useState('');
+  const [gameSearchQuery, setGameSearchQuery] = useState('');
   const [isManualIndexOpen, setIsManualIndexOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [limit, setLimit] = useState(20);
@@ -115,7 +116,7 @@ export default function Home() {
       return res.data;
     },
     onSuccess: (data) => {
-      toast.success(`${t('common.status')}: Encontradas correspondências para ${data.matchedCount} itens.`);
+      toast.success(t('home.folders.scanSuccess', { count: data.matchedCount }));
       queryClient.invalidateQueries({ queryKey: ['games'] });
       if (showFolders) refetchFolders();
     },
@@ -140,6 +141,29 @@ export default function Home() {
       queryClient.invalidateQueries({ queryKey: ['games'] });
     },
     onError: (err: any) => toast.error(t('common.error') + ': ' + err.message)
+  });
+
+  const removeIndexMutation = useMutation({
+    mutationFn: async (folderName: string) => {
+      const res = await api.post('/filesystem/remove-index', { folderName });
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success(t('home.folders.removeSuccess'));
+      refetchFolders();
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+    },
+    onError: (err: any) => toast.error(t('common.error') + ': ' + err.message)
+  });
+
+  const { data: dbGamesSearch } = useQuery({
+    queryKey: ['games_search', gameSearchQuery],
+    queryFn: async () => {
+      if (!gameSearchQuery) return { games: [] };
+      const res = await api.get('/games', { params: { q: gameSearchQuery, limit: 10 } });
+      return res.data;
+    },
+    enabled: isManualIndexOpen && gameSearchQuery.length > 2
   });
 
   const games = data?.games || [];
@@ -482,10 +506,18 @@ export default function Home() {
                         if (!isIndexed && hasApk) {
                           setManualIndexFolder(folder.name);
                           setIsManualIndexOpen(true);
+                          setGameSearchQuery('');
                         } else if (isIndexed) {
-                          toast.info(`Esta pasta já está vinculada ao jogo ID ${folder.gameId}`);
+                          toast.info(t('home.folders.indexedMessage', { id: folder.gameId }));
                         } else if (!hasApk) {
-                          toast.error('Nenhum arquivo APK detectado nesta pasta.');
+                          toast.error(t('home.folders.noApk'));
+                        }
+                      }}
+                      onDoubleClick={() => {
+                        if (isIndexed) {
+                          if (window.confirm(t('home.folders.removeConfirm'))) {
+                            removeIndexMutation.mutate(folder.name);
+                          }
                         }
                       }}
                     >
@@ -499,7 +531,7 @@ export default function Home() {
                       <div className="flex flex-col min-w-0">
                         <span className="font-semibold text-sm truncate" title={folder.name}>{folder.name}</span>
                         {isIndexed ? (
-                          <span className="text-[10px] text-emerald-600 font-bold uppercase">{t('home.folders.indexed')} - ID {folder.gameId}</span>
+                          <span className="text-[10px] text-emerald-600 font-bold uppercase">{t('home.folders.indexedWithId', { id: folder.gameId })}</span>
                         ) : hasApk ? (
                           <span className="text-[10px] text-amber-600 font-bold uppercase flex items-center gap-1">
                             <AlertCircle className="h-2.5 w-2.5" /> {t('home.folders.clickToIndex')}
@@ -517,7 +549,7 @@ export default function Home() {
 
         {isError && (
           <div className="p-8 text-center text-red-500 bg-red-500/10 rounded-xl border border-red-500/20">
-            <p className="font-medium text-lg">Erro ao carregar jogos. Verifique se o backend está executando.</p>
+            <p className="font-medium text-lg">{t('home.status.error')}</p>
           </div>
         )}
 
@@ -735,15 +767,44 @@ export default function Home() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="gameId">ID do Jogo (ex: 2128)</Label>
+                <Label htmlFor="gameSearch">{t('home.folders.searchGame')}</Label>
                 <Input
-                  id="gameId"
-                  placeholder="2128"
-                  value={manualGameId}
-                  onChange={(e) => setManualGameId(e.target.value)}
-                  type="number"
+                  id="gameSearch"
+                  placeholder={t('home.folders.searchHint')}
+                  value={gameSearchQuery}
+                  onChange={(e) => setGameSearchQuery(e.target.value)}
                   autoFocus
                 />
+                
+                {gameSearchQuery.length > 2 && dbGamesSearch && dbGamesSearch.games && (
+                  <div className="mt-2 max-h-40 overflow-y-auto border border-border/50 rounded-md bg-card custom-scrollbar shadow-sm">
+                    {dbGamesSearch.games.length === 0 ? (
+                      <div className="p-3 text-sm text-muted-foreground text-center">{t('home.folders.noResults')}</div>
+                    ) : (
+                      dbGamesSearch.games.map((g: any) => (
+                        <div 
+                          key={g.id} 
+                          className={`p-2 text-sm cursor-pointer border-b border-border/50 last:border-0 hover:bg-muted transition-colors ${manualGameId === String(g.id) ? 'bg-primary/20 text-primary font-bold border-l-2 border-l-primary' : ''}`}
+                          onClick={() => setManualGameId(String(g.id))}
+                        >
+                          {g.title.replace(/\[.*?\]/g, '').trim()} <span className="text-xs text-muted-foreground ml-1">(ID: {g.id})</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <Label htmlFor="gameId" className="text-xs text-muted-foreground">{t('home.folders.manualIdHint')}</Label>
+                  <Input
+                    id="gameId"
+                    placeholder="2128"
+                    value={manualGameId}
+                    onChange={(e) => setManualGameId(e.target.value)}
+                    type="number"
+                    className="mt-1 h-8 text-sm"
+                  />
+                </div>
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">

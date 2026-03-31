@@ -109,7 +109,8 @@
       "downloaded": "DOWNLOADED",
       "predownload": "PREDOWNLOAD",
       "downloading": "DOWNLOADING",
-      "installed": "Installed"
+      "installed": "Installed",
+      "error": "Error loading games. Check if the backend is running."
     },
     "folders": {
       "title": "Physical Files on HD",
@@ -117,7 +118,17 @@
       "noFolders": "No folders found in this directory.",
       "checkSettings": "Check if the path is correct in Settings",
       "indexed": "Indexed",
-      "clickToIndex": "Click to index"
+      "clickToIndex": "Click to index",
+      "removeConfirm": "Do you want to remove the indexing of this folder?\n\nThis will disconnect the folder from the game in the Library, but the game will NOT be deleted from your PC.",
+      "searchGame": "Search Game (Name)",
+      "searchHint": "Ex: Beat Saber...",
+      "noResults": "No results found.",
+      "manualIdHint": "Or enter ID manually",
+      "indexedMessage": "This folder is already linked to game ID {{id}}. Double-click to unindex.",
+      "removeSuccess": "Indexing removed successfully!",
+      "noApk": "No APK file detected in this folder.",
+      "scanSuccess": "Status: Found matches for {{count}} items.",
+      "indexedWithId": "Indexed - ID {{id}}"
     },
     "pagination": {
       "itemsPerPage": "Items per page:",

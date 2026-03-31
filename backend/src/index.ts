@@ -1182,6 +1182,34 @@ app.post('/api/filesystem/manual-index', async (req, res) => {
   }
 });
 
+app.post('/api/filesystem/remove-index', async (req, res) => {
+  const { folderName } = req.body;
+  const downloadPath = globalDownloadPath;
+  
+  if (!downloadPath || !folderName) {
+    return res.status(400).json({ error: 'Dados insuficientes' });
+  }
+
+  try {
+    const inventory = getInventory(downloadPath);
+    let removed = false;
+    
+    for (const hash in inventory.downloads) {
+      if (inventory.downloads[hash].folderName === folderName) {
+        delete inventory.downloads[hash];
+        removed = true;
+      }
+    }
+
+    if (removed) {
+      updateInventory(downloadPath, inventory);
+    }
+    res.json({ success: true, removed });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/adb/install', async (req, res) => {
   const { folderPath, deviceId } = req.body;
   if (!folderPath) return res.status(400).json({ error: 'Caminho da pasta é obrigatório' });
