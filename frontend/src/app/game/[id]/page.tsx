@@ -192,7 +192,7 @@ export default function GamePage() {
       const selectedDevice = devices.length > 0 ? devices[0] : null;
       if (!selectedDevice) throw new Error("Nenhum dispositivo VR detectado via USB.");
       
-      const fullPath = `${downloadPath}\\${localPathString}`;
+      const fullPath = `${downloadPath}/${localPathString}`;
       const res = await api.post('/adb/install', { folderPath: fullPath, deviceId: selectedDevice });
       return res.data;
     },

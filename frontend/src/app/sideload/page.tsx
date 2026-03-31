@@ -86,7 +86,7 @@ export default function SideloadPage() {
     mutationFn: async (folderName: string) => {
       setInstallingFolder(folderName);
       if (!downloadPath) throw new Error(t('sideload.install.noPath'));
-      const fullPath = `${downloadPath}\\${folderName}`;
+      const fullPath = `${downloadPath}/${folderName}`;
       const res = await api.post('/adb/install', { folderPath: fullPath, deviceId: selectedDevice });
       return res.data;
     },
