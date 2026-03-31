@@ -60,77 +60,72 @@ O **VR Rookie Downloader** é uma ferramenta de indexação técnica. É imperat
 - Transferência automatizada de arquivos APK e pastas de dados (OBB).
 - Suporte para múltiplos dispositivos detectados via USB.
 
-## Instalação (Manual)
+## 🛠️ Instalação
 
-> Aviso: O projeto está em fase de desenvolvimento e pode conter bugs.
+> **Nota:** O projeto atualmente funciona melhor no Windows. O suporte para MacOS é experimental (o sideloading requer configuração manual do ADB).
 
-**A instalação requer configuração prévia de dependências do sistema. Siga o processo abaixo.**
+### 1. Pré-requisitos
+- **[Node.js](https://nodejs.org/)** (v18.x ou superior)
+- **[Git](https://git-scm.com/)**
 
-<details>
-<summary>Clique para ver o processo de instalação</summary>
-
-### 1. Requisitos do Sistema
-
-- **[Node.js](https://nodejs.org/):** Versão 18.x ou superior.
-- **[qBitTorrent](https://www.qbittorrent.org/):** É necessário configurar a **Web UI** para que o app possa gerenciar os downloads:
-  1. Abra o qBitTorrent e vá em `Ferramentas` -> `Opções` -> `Web UI`.
-  2. Marque a caixa **Interface de Usuário da Web (Controle Remoto)**.
-  3. No campo **Endereço IP**, use `127.0.0.1` e na **Porta**, use `8080` (padrão do projeto).
-  4. Em **Autenticação**, verifique se o usuário é `admin`.
-  5. **Senha:** O projeto está configurado para usar a senha padrão `adminadmin`. Caso deseje usar outra, você precisará atualizar a função `loginQbit` no arquivo `backend/src/index.ts`.
-  6. (Opcional) Marque **Ignorar autenticação para clientes no host local** para simplificar a conexão.
-- **[ADB (Android Debug Bridge)](https://developer.android.com/tools/adb):** O binário `adb` **DEVE** estar configurado no **PATH** do sistema operacional.
-
-### 2. Configuração do Ambiente
-
-Clone o repositório e execute o instalador automatizado:
+### 2. Configuração Automática (Windows)
+Clone o repositório e execute o script de instalação. O script verificará automaticamente o Node.js, instalará as dependências do projeto e baixará/configurará opcionalmente o **ADB** e o **qBitTorrent** para você!
 
 ```powershell
 git clone https://github.com/yGuilhermy/VRRookieDownloader.git
 cd VRRookieDownloader
 .\setup.bat
 ```
+*(Durante a instalação, você será questionado se deseja instalar o qBitTorrent automaticamente caso ele não seja encontrado no seu sistema.)*
 
-O script de setup verificará a presença do Node.js e do ADB no seu PATH antes de instalar as dependências do projeto.
+### 3. Configuração do qBitTorrent
+Caso você tenha instalado o qBitTorrent manualmente ou queira verificar a instalação automática, você **DEVE** ativar a Web UI:
+1. Abra o qBitTorrent e vá em `Ferramentas` -> `Opções` -> `Web UI`.
+2. Marque a caixa **Interface de Usuário da Web (Controle Remoto)**.
+3. Endereço IP: `127.0.0.1` | Porta: `8080` (Padrão).
+4. Autenticação: Usuário `admin` | Senha `adminadmin`. *(Se você alterar a senha, deverá atualizar a função `loginQbit` no arquivo `backend/src/index.ts`)*.
+5. *(Opcional)* Marque **Ignorar autenticação para clientes no host local** para simplificar a conexão e melhorar a estabilidade.
 
----
-
-### Execução
-
-Para iniciar o projeto:
-
+### 4. Executando o App
 ```powershell
 .\start.bat
 ```
+_Execute como Administrador se desejar utilizar o domínio local `http://vrrookie.local` para acessá-lo a partir de outros dispositivos na sua rede._
 
-_Execute como Administrador se desejar utilizar o domínio local `http://vrrookie.local`._
+## 🎮 Guia de Uso
 
-</details>
+### 1. Assistente de Configuração (Setup Wizard)
+Ao abrir pela primeira vez, o **Setup Wizard** receberá você. Ele valida automaticamente o ambiente:
+- Verifica se o **ADB** está disponível globalmente para o sideloading.
+- Testa a conexão com a **Web UI do qBitTorrent**.
+- Valida a sessão do **RuTracker** (resolvendo captchas e login em segundo plano).
+- Define e constrói a sua **Pasta Global de Jogos**.
 
-## Guia de Uso
+### 2. Navegação e Downloads
+- Use a **Barra Lateral de Filtros** para pesquisar por gêneros, desenvolvedores ou texto. Você pode ocultar a barra para uma visão mais focada.
+- Clique no card de um jogo para ver os detalhes completos e informações traduzidas.
+- Clique em **Baixar no Servidor** para enviar o link magnético diretamente para o qBitTorrent. A interface mostrará o progresso em tempo real.
 
-### 1. Configuração Inicial (Setup Wizard)
+### 3. Sideloading para o Quest
+- Assim que o download atingir 100%, o botão do jogo mudará para **Instalar no Quest**.
+- Conecte o seu Meta Quest via cabo USB (certifique-se de que o Modo Desenvolvedor e a Depuração USB estejam ativos).
+- Clique no botão de instalar ou navegue até a guia **Sideloading** para gerenciar múltiplos APKs/OBBs locais de uma vez. O app transferirá e configurará os arquivos `.apk` e `.obb` no headset automaticamente.
 
-Ao abrir o aplicativo pela primeira vez, você será guiado pelo **Assistente de Configuração (Setup Wizard)**. Este processo automatizado validará:
+### 4. Utilizando um Cliente Torrent Externo (Opcional)
+Se você optar por não utilizar o qBitTorrent integrado, é possível baixar os arquivos com qualquer outro cliente padrão (ex: uTorrent, Vuze):
+1. Na página do jogo, clique em **Baixar** (no texto abaixo do botão principal) para abrir o magnet link no seu aplicativo torrent padrão.
+2. Após o término e seed do download, **copie ou mova a pasta final do jogo** para a sua **Pasta Global de Jogos** (configurada no app).
+3. Vá até a aba de **Meus Jogos (Sideloading)** e ative o botão para **atualizar / mostrar pastas locais**.
+4. Encontre a pasta adicionada na lista de pastas não-indexadas, clique nela e mande **Indexar o Jogo** de forma manual. Pronto, a opção de instalar ficará habilitada!
 
-- **Idioma:** Preferências de interface e tradução da biblioteca.
-- **ADB:** Presença do executável no PATH do sistema.
-- **qBittorrent:** Conexão com o WebUI e status do processo.
-- **RuTracker:** Autenticação e validade da sessão.
-- **Diretório:** Caminho da pasta de jogos.
+## ☑️ To-Do (Lista de Tarefas)
 
-### 2. Catálogo e Download
-
-- **Personalização de Busca:** Você pode alterar os termos de pesquisa padrão editando as `baseQueries` no arquivo `backend/src/scraper/worker.ts` (linhas 231-235).
-- Utilize o botão **Iniciar Indexador** (disponível ao final do Setup ou em Configurações) para buscar novos títulos do fórum.
-- Clique no card do jogo para abrir os detalhes e clique em **Baixar no Servidor**.
-- O jogo será enviado automaticamente para o seu qBitTorrent.
-
-### 3. Instalação (Sideloading)
-
-- Com o download concluído no PC, conecte seu headset VR via USB.
-- No menu do jogo baixado, clique em **Instalar no Quest**.
-- O sistema gerenciará a instalação do APK e dos arquivos OBB.
+- [ ] Criar um `.exe` compilado para execução com apenas 1 clique (Release).
+- [ ] Adicionar suporte a múltiplas fontes de indexação além do RuTracker.
+- [ ] Implementar scripts de instalação nativos para MacOS/Linux (`setup.sh`).
+- [ ] Configurar a WebUI do qBitTorrent automaticamente via alteração nos arquivos de configuração do PC.
+- [x] Quebra de captcha do RuTracker completamente em segundo plano.
+- [x] Suporte multi-idioma global (Inglês/Português).
 
 ## Stack Técnica
 

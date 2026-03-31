@@ -65,29 +65,37 @@ if %errorlevel% neq 0 (
         echo OK! qBitTorrent found at C:\Program Files\qBittorrent.
     ) else (
         echo [!] qBitTorrent not detected on the system.
-        echo Attempting to install via Winget - Windows Package Manager...
         
-        winget --version >nul 2>nul
-        if !errorlevel! equ 0 (
-            echo [1/2] Starting silent installation via Winget...
-            winget install --id qBittorrent.qBittorrent --silent --accept-package-agreements --accept-source-agreements
+        echo.
+        set /p "INSTALL_QBIT=[?] Do you want to automatically install qBitTorrent? (Y/N): "
+        if /i "!INSTALL_QBIT!"=="Y" (
+            echo Attempting to install via Winget - Windows Package Manager...
+            
+            winget --version >nul 2>nul
             if !errorlevel! equ 0 (
-                echo [2/2] qBitTorrent installed successfully!
-                set "QBIT_INSTALLED=1"
+                echo [1/2] Starting silent installation via Winget...
+                winget install --id qBittorrent.qBittorrent --silent --accept-package-agreements --accept-source-agreements
+                if !errorlevel! equ 0 (
+                    echo [2/2] qBitTorrent installed successfully!
+                    set "QBIT_INSTALLED=1"
+                ) else (
+                    echo [!] Winget installation failed. Attempting direct download...
+                )
             ) else (
-                echo [!] Winget installation failed. Attempting direct download...
+                echo [!] Winget not found. Attempting direct download...
+            )
+            
+            if not defined QBIT_INSTALLED (
+                echo [1/2] Downloading qBitTorrent installer...
+                powershell -Command "Invoke-WebRequest -Uri 'https://managedway.dl.sourceforge.net/project/qbittorrent/qbittorrent-win32/qbittorrent-4.6.3/qbittorrent_4.6.3_x64_setup.exe' -OutFile 'qbit_setup.exe'"
+                echo [2/2] Running installer - this may take a few minutes...
+                start /wait qbit_setup.exe /S
+                del /f /q qbit_setup.exe
+                echo [OK] qBitTorrent installed successfully!
             )
         ) else (
-            echo [!] Winget not found. Attempting direct download...
-        )
-        
-        if not defined QBIT_INSTALLED (
-            echo [1/2] Downloading qBitTorrent installer...
-            powershell -Command "Invoke-WebRequest -Uri 'https://managedway.dl.sourceforge.net/project/qbittorrent/qbittorrent-win32/qbittorrent-4.6.3/qbittorrent_4.6.3_x64_setup.exe' -OutFile 'qbit_setup.exe'"
-            echo [2/2] Running installer - this may take a few minutes...
-            start /wait qbit_setup.exe /S
-            del /f /q qbit_setup.exe
-            echo [OK] qBitTorrent installed successfully!
+            echo [!] qBitTorrent installation skipped.
+            echo IMPORTANT: The application requires qBitTorrent to download games.
         )
     )
 ) else (
