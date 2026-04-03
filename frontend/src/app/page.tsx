@@ -52,7 +52,7 @@ export default function Home() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   
-  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  
   
   const { offlineMode, downloadPath, setDownloadPath } = useStore();
   const queryClient = useQueryClient();
@@ -217,11 +217,14 @@ export default function Home() {
   useEffect(() => {
     if (updateInfo) {
       if (updateInfo.available) {
-        setShowUpdateDialog(true);
-      } else if (!updateInfo.error) {
-        toast.success(t('home.update.upToDate'), { 
-          icon: <Zap className="h-4 w-4 text-emerald-500" />,
-          duration: 3000
+        toast.info(t('home.update.available'), {
+          description: t('home.update.description', { version: updateInfo.remoteVersion }),
+          icon: <Zap className="h-4 w-4 text-primary animate-pulse" />,
+          duration: 15000,
+          action: {
+            label: t('home.update.view'),
+            onClick: () => window.open(updateInfo.githubUrl, '_blank')
+          }
         });
       }
     }
@@ -966,45 +969,7 @@ export default function Home() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        {/* Update Dialog */}
-        <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
-          <DialogContent className="sm:max-w-[425px] bg-card/95 backdrop-blur-xl border-primary/20">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-2xl">
-                <Zap className="h-6 w-6 text-primary animate-pulse" />
-                {t('home.update.available')}
-              </DialogTitle>
-              <DialogDescription className="pt-4 text-lg">
-                {t('home.update.description', { version: updateInfo?.remoteVersion })}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-3 py-4">
-              <div className="flex items-center justify-between px-4 py-2 bg-muted/50 rounded-lg border border-border/50">
-                <span className="text-sm text-muted-foreground uppercase tracking-widest font-bold">Local</span>
-                <span className="font-mono font-bold text-primary">{updateInfo?.localVersion}</span>
-              </div>
-              <div className="flex items-center justify-between px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
-                <span className="text-sm text-primary uppercase tracking-widest font-bold">GitHub</span>
-                <span className="font-mono font-bold text-primary">{updateInfo?.remoteVersion}</span>
-              </div>
-            </div>
-            <DialogFooter className="flex flex-row gap-2 sm:justify-end">
-              <Button variant="ghost" onClick={() => setShowUpdateDialog(false)}>
-                {t('home.update.ignore')}
-              </Button>
-              <Button 
-                className="bg-primary text-black hover:bg-primary/90 gap-2 shadow-lg shadow-primary/20"
-                onClick={() => {
-                  window.open(updateInfo?.githubUrl, '_blank');
-                  setShowUpdateDialog(false);
-                }}
-              >
-                <Globe className="h-4 w-4" />
-                {t('home.update.view')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Update Logic moved to toast */}
       </main>
     </div>
   );

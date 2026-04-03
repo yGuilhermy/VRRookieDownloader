@@ -129,6 +129,9 @@ chmod +x update.sh
 ./update.sh
 ```
 
+- **Opção 1 (Normal):** Checa a versão no GitHub e só atualiza se houver uma nova.
+- **Opção 2 (Hard Update):** Força a reinstalação completa, baixando os arquivos mais recentes independente da versão atual.
+
 Aguarde o carregamento e acesse http://localhost:3000 ou http://vrrookie.local para usar o app via navegador.
 
 ### Configuração do qBitTorrent
@@ -197,4 +200,4 @@ Nota: Pode acontecer da instalação falhar por algum motivo, provavelmente o jo
 
 ---
 
-_Gerencie sua biblioteca VR local com eficiência e automação._
+_Gerencie sua biblioteca VR local com eficiência e automação..._

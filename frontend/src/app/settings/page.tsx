@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, KeyRound, ServerOff, Database, Bot, RefreshCcw, LogIn, StopCircle, PlayCircle, FolderOpen, Languages, AlertTriangle } from 'lucide-react';
+import { Loader2, KeyRound, ServerOff, Database, Bot, RefreshCcw, LogIn, StopCircle, PlayCircle, FolderOpen, Languages, AlertTriangle, Zap, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 
 import AdminPanel from '@/components/AdminPanel';
@@ -119,6 +119,29 @@ export default function Settings() {
     setOfflineMode(val);
     saveSettings.mutate({ offlineMode: val });
   };
+
+  const updateCheck = useMutation({
+    mutationFn: async () => (await api.get('/update/check')).data,
+    onSuccess: (data) => {
+      if (data.available) {
+        toast.info(t('home.update.available'), {
+          description: t('home.update.description', { version: data.remoteVersion }),
+          icon: <Zap className="h-4 w-4 text-primary animate-pulse" />,
+          duration: 15000,
+          action: {
+            label: t('home.update.view'),
+            onClick: () => window.open(data.githubUrl, '_blank')
+          }
+        });
+      } else {
+        toast.success(t('home.update.upToDate'), {
+          icon: <Zap className="h-4 w-4 text-emerald-500" />,
+          duration: 3000
+        });
+      }
+    },
+    onError: () => toast.error(t('common.error'))
+  });
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -282,6 +305,22 @@ export default function Settings() {
               </div>
             </div>
           </CardContent>
+          <CardFooter className="border-t border-border/50 pt-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+            <div className="flex items-center gap-2">
+               <Zap className="h-4 w-4 text-primary" />
+               <span className="text-sm font-medium">Software: v0.1.4</span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => updateCheck.mutate()}
+              disabled={updateCheck.isPending}
+              className="gap-2 border-primary/20 hover:border-primary/50"
+            >
+              {updateCheck.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+              Checar Atualizações
+            </Button>
+          </CardFooter>
         </Card>
       </div>
 

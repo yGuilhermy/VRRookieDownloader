@@ -16,7 +16,6 @@
   <a href="https://nodejs.org/" target="_blank"><img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"/></a>
   <a href="https://nextjs.org/" target="_blank"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"/></a>
   <a href="https://www.typescriptlang.org/" target="_blank"><img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/></a>
-  <a href="https://www.electronjs.org/" target="_blank"><img src="https://img.shields.io/badge/Electron-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron"/></a>
 </p>
 
 ## Legal Disclaimer
@@ -43,6 +42,7 @@
 **Automated metadata capture directly from the original forum**
 
 - Extraction of **Genre**, **Version**, **Developer**, and **Seeds/Leechers** statistics.
+
 ### Automation & Updates
 
 **Keeping your app updated and your library synced**
@@ -82,6 +82,7 @@
 Clone the repository and run the installer for your platform:
 
 **Windows:**
+
 ```powershell
 git clone https://github.com/yGuilhermy/VRRookieDownloader.git
 cd VRRookieDownloader
@@ -89,6 +90,7 @@ cd VRRookieDownloader
 ```
 
 **Linux (Debian/Ubuntu):**
+
 ```bash
 git clone https://github.com/yGuilhermy/VRRookieDownloader.git
 cd VRRookieDownloader
@@ -99,11 +101,13 @@ chmod +x setup.sh start.sh
 #### 3. Run
 
 **Windows:**
+
 ```powershell
 .\start.bat
 ```
 
 **Linux:**
+
 ```bash
 ./start.sh
 ```
@@ -113,15 +117,20 @@ chmod +x setup.sh start.sh
 To check for and install updates automatically:
 
 **Windows:**
+
 ```powershell
 .\update.bat
 ```
 
 **Linux:**
+
 ```bash
 chmod +x update.sh
 ./update.sh
 ```
+
+- **Option 1 (Normal):** Checks the version and only updates if a newer one exists on GitHub.
+- **Option 2 (Hard Update):** Forces a full reinstall, downloading the latest source independently of the current version.
 
 Wait for the loading to finish and access http://localhost:3000 or http://vrrookie.local to use the app via browser.
 
@@ -191,4 +200,4 @@ Note: The installation may fail for some reason, probably the downloaded game ha
 
 ---
 
-_Manage your local VR library efficiently and automatically._
+_Manage your local VR library efficiently and automatically..._
