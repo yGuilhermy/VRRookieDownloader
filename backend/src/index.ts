@@ -30,7 +30,7 @@ import {
   checkAdbPath,
   runAdbCommand
 } from './utils/adb';
-import { performRookieSideload } from './utils/sideload';
+import { performSideForgeSideload } from './utils/sideload';
 import { Bonjour } from 'bonjour-service';
 import mdns from 'multicast-dns';
 import os from 'os';
@@ -53,10 +53,10 @@ const localIps = getAllLocalIps();
 
 mDNS.on('query', (query: any) => {
   try {
-    if (query?.questions && query.questions.some((q: any) => q.name === 'vrrookie.local')) {
-      const records = localIps.map(ip => ({ name: 'vrrookie.local', type: 'A' as const, data: ip }));
+    if (query?.questions && query.questions.some((q: any) => q.name === 'vrsideforge.local')) {
+      const records = localIps.map(ip => ({ name: 'vrsideforge.local', type: 'A' as const, data: ip }));
       mDNS.respond(records);
-      // console.log(`[mDNS] Responding for vrrookie.local with ${localIps.join(', ')}`);
+      // console.log(`[mDNS] Responding for vrsideforge.local with ${localIps.join(', ')}`);
     }
   } catch (err) {
     console.error('[mDNS] Response Error:', err);
@@ -68,7 +68,7 @@ mDNS.on('error', (err) => {
 });
 
 const bj = new Bonjour();
-bj.publish({ name: 'VR Rookie Downloader', type: 'http', port: 80 });
+bj.publish({ name: 'VRSideForge', type: 'http', port: 80 });
 
 const app = express();
 const httpServer = createServer(app);
@@ -85,10 +85,20 @@ app.use(express.json());
 
 // --- Inventory & Global Config ---
 const getUserDataDir = (): string => {
-  if (process.platform === 'win32') {
-    return path.join(os.homedir(), 'Documents', 'VRRookieDownloader');
+  const oldDir = process.platform === 'win32' 
+    ? path.join(os.homedir(), 'Documents', 'VRRookieDownloader')
+    : path.join(os.homedir(), '.local', 'share', 'VRRookieDownloader');
+
+  const newDir = process.platform === 'win32' 
+    ? path.join(os.homedir(), 'Documents', 'VRSideForge')
+    : path.join(os.homedir(), '.local', 'share', 'VRSideForge');
+
+  if (fs.existsSync(oldDir) && !fs.existsSync(newDir)) {
+    console.log(`[Migration] Renaming ${oldDir} to ${newDir}`);
+    fs.renameSync(oldDir, newDir);
   }
-  return path.join(os.homedir(), '.local', 'share', 'VRRookieDownloader');
+
+  return newDir;
 };
 export const USER_DATA_DIR = getUserDataDir();
 if (!fs.existsSync(USER_DATA_DIR)) {
@@ -677,7 +687,7 @@ app.get('/api/db/export', async (req, res) => {
   
   const zipBuffer = zip.toBuffer();
   
-  res.attachment(`vrrookie_backup_${Date.now()}.zip`);
+  res.attachment(`vrsideforge_backup_${Date.now()}.zip`);
   res.send(zipBuffer);
 });
 
@@ -1282,17 +1292,17 @@ app.post('/api/adb/install', async (req, res) => {
   }
 
   // Responde imediatamente para evitar timeout
-  res.json({ success: true, message: 'Processo de instalação Rookie iniciado em segundo plano.' });
+  res.json({ success: true, message: 'Processo de instalação SideForge iniciado em segundo plano.' });
 
-  // Inicia o processo em segundo plano usando a nova lógica Rookie
+  // Inicia o processo em segundo plano usando a nova lógica SideForge
   (async () => {
     try {
-      console.log(`[ROOKIE-SIDELOAD] Background install started for: "${targetDir}"`);
+      console.log(`[SIDEFORGE-SIDELOAD] Background install started for: "${targetDir}"`);
       
-      const result = await performRookieSideload(targetDir, deviceId, globalInterfaceLanguage);
+      const result = await performSideForgeSideload(targetDir, deviceId, globalInterfaceLanguage);
       
       // Indexação automática após sucesso (lógica já existente)
-      if (result.installLog.some(log => log.success)) {
+      if (result.installLog.some((log: any) => log.success)) {
         try {
           const folderName = path.basename(targetDir);
           const inventory = getInventory(globalDownloadPath);
@@ -1332,7 +1342,7 @@ app.post('/api/adb/install', async (req, res) => {
       });
 
     } catch (err: any) {
-      console.error(`[ROOKIE-SIDELOAD] Error: ${err.message}`);
+      console.error(`[SIDEFORGE-SIDELOAD] Error: ${err.message}`);
       io.emit('adb_event', { type: 'error', message: err.message, folderPath: targetDir });
     }
   })();
@@ -1347,7 +1357,7 @@ async function checkUpdate() {
 
     const localPkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
     const localVersion = localPkg.version;
-    const remoteUrl = 'https://raw.githubusercontent.com/yGuilhermy/VRRookieDownloader/main/package.json';
+    const remoteUrl = 'https://raw.githubusercontent.com/yGuilhermy/VRSideForge/main/package.json';
     
     // Bypass GitHub cache for raw content with a timestamp
     const remoteRes = await axios.get(`${remoteUrl}?t=${Date.now()}`, { timeout: 8000 });
@@ -1366,7 +1376,7 @@ async function checkUpdate() {
       available, 
       localVersion, 
       remoteVersion, 
-      githubUrl: 'https://github.com/yGuilhermy/VRRookieDownloader' 
+      githubUrl: 'https://github.com/yGuilhermy/VRSideForge' 
     };
   } catch (e) {
     return { available: false, error: 'Fail to fetch update info' };

@@ -2,7 +2,7 @@
 set -e
 
 echo "=========================================="
-echo "   VR Rookie Downloader - Auto Starter"
+echo "   VRSideForge - Linux Starter"
 echo "=========================================="
 echo
 

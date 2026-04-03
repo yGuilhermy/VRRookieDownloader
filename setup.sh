@@ -2,7 +2,7 @@
 set -e
 
 echo "=========================================="
-echo "   VR Rookie Downloader - Linux Installer"
+echo "   VRSideForge - Linux Installer"
 echo "=========================================="
 echo
 
@@ -38,7 +38,7 @@ if ! command -v adb &> /dev/null; then
       if command -v adb &> /dev/null; then
         echo "[OK] ADB installed successfully via apt!"
       else
-        ADB_DIR="$HOME/.local/share/VRRookieDownloader/adb"
+        ADB_DIR="$HOME/.local/share/VRSideForge/adb"
         mkdir -p "$ADB_DIR"
         echo "[1/3] Downloading ADB platform-tools for Linux..."
         curl -L "https://dl.google.com/android/repository/platform-tools-latest-linux.zip" -o "$ADB_DIR/platform-tools.zip"

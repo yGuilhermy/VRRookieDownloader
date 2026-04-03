@@ -19,8 +19,8 @@ export default function Navbar() {
       <div className="container mx-auto flex h-16 items-center flex-wrap px-4 sm:px-6 lg:px-8">
         <div className="mr-8 flex items-center mb-2 sm:mb-0">
           <Link href="/" className="flex items-center space-x-2">
-            <img src="/icon.png" alt="VR Rookie Icon" className="h-8 w-8" />
-            <span className="font-bold sm:inline-block hidden">VR Rookie Downloader</span>
+            <img src="/icon.png" alt="VRSideForge Icon" className="h-8 w-8" />
+            <span className="font-bold sm:inline-block hidden">VRSideForge</span>
           </Link>
         </div>
         

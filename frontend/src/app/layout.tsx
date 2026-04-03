@@ -10,8 +10,8 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'VR Rookie Downloader',
-  description: 'Catálogo organizado de downloads VR',
+  title: 'VRSideForge',
+  description: 'Catálogo organizado de downloads e sideload VR',
 };
 
 export default function RootLayout({

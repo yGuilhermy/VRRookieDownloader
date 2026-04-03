@@ -63,13 +63,13 @@ const getMsg = (key: string, lang: string = 'en', data?: any) => {
 };
 
 /**
- * Replicates the "Rookie" sideloading logic: 
+ * Replicates the "SideForge" sideloading logic: 
  * - Recursive discovery
  * - Auto-reinstall on failure with data backup
  * - install.txt support
  * - OBB folder pairing
  */
-export async function performRookieSideload(targetPath: string, deviceId?: string, lang: string = 'en'): Promise<SideloadResult> {
+export async function performSideForgeSideload(targetPath: string, deviceId?: string, lang: string = 'en'): Promise<SideloadResult> {
   const absolutePath = path.resolve(targetPath);
   const installLog: any[] = [];
   const obbLog: any[] = [];

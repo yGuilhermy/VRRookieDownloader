@@ -35,15 +35,15 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="md:col-span-2 lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/icon.png" alt="VR Rookie Icon" className="h-8 w-8" />
-              <span className="text-xl font-bold tracking-tight">VR Rookie <span className="text-primary">Downloader</span></span>
+              <img src="/icon.png" alt="VRSideForge Icon" className="h-8 w-8" />
+              <span className="text-xl font-bold tracking-tight">VR<span className="text-primary">SideForge</span></span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
               {t('footer.description')}
             </p>
             <div className="flex space-x-4 pt-2">
               <a 
-                href="https://github.com/yGuilhermy/VRRookieDownloader" 
+                href="https://github.com/yGuilhermy/VRSideForge" 
                 target="_blank" 
                 rel="noreferrer" 
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -85,7 +85,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a 
-                  href="https://github.com/yGuilhermy/VRRookieDownloader?tab=readme-ov-file#aviso-legal-disclaimer" 
+                  href="https://github.com/yGuilhermy/VRSideForge?tab=readme-ov-file#aviso-legal-disclaimer" 
                   target="_blank" 
                   rel="noreferrer"
                   className="flex items-center gap-2 hover:text-primary transition-colors"
@@ -107,7 +107,7 @@ export default function Footer() {
               </li>
               <li>
                 <a 
-                  href="https://github.com/yGuilhermy/VRRookieDownloader" 
+                  href="https://github.com/yGuilhermy/VRSideForge" 
                   target="_blank" 
                   rel="noreferrer"
                   className="flex items-center gap-2 hover:text-primary transition-colors"
@@ -122,7 +122,7 @@ export default function Footer() {
  
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <p>© {currentYear} VR Rookie Downloader · {t('footer.copyright')} · By <a href="https://github.com/yGuilhermy" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">@yGuilhermy</a>.</p>
+          <p>© {currentYear} VRSideForge · {t('footer.copyright')} · By <a href="https://github.com/yGuilhermy" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">@yGuilhermy</a>.</p>
           <div className="flex items-center gap-1">
             {t('footer.madeWith')} <Activity className="h-3 w-3 text-red-500 fill-red-500" /> {t('footer.forEnthusiasts')}
           </div>

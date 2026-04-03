@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "vrsideforge-backend",
   "version": "0.1.6",
   "main": "index.js",
   "scripts": {
@@ -30,8 +30,7 @@
     "socket.io": "^4.8.3",
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1",
-    "vrrookie-downloader": "file:..",
-    "vrrookiedownloader": "file:..",
+    "vrsideforge": "file:..",
     "webtorrent": "^1.9.7"
   },
   "devDependencies": {

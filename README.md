@@ -2,7 +2,7 @@
   <img src="frontend/src/app/icon.png" width="128" height="128">
 </p>
 
-<h1 align="center">VR Rookie Downloader</h1>
+<h1 align="center">VRSideForge</h1>
 
 <p align="center">
   🌐 <a href="README-PT.md">Português</a> | <a href="README.md">English</a>
@@ -20,7 +20,7 @@
 
 ## Legal Disclaimer
 
-**VR Rookie Downloader** is a technical indexing tool. It is imperative to understand the nature of the software:
+**VRSideForge** is a technical indexing tool. It is imperative to understand the nature of the software:
 
 - **Indexing Only:** This system does not host, store, or distribute any type of copyrighted content. The software works exclusively as a scraper that organizes metadata from third-party sources (Rutracker Forum).
 - **Disclaimer:** The project is provided "as is", without warranties of any kind. The use of this tool to access or download content is the sole and exclusive responsibility of the end user.
@@ -85,16 +85,16 @@ Clone the repository and run the installer for your platform:
 **Windows:**
 
 ```powershell
-git clone https://github.com/yGuilhermy/VRRookieDownloader.git
-cd VRRookieDownloader
+git clone https://github.com/yGuilhermy/VRSideForge.git
+cd VRSideForge
 .\setup.bat
 ```
 
 **Linux (Debian/Ubuntu):**
 
 ```bash
-git clone https://github.com/yGuilhermy/VRRookieDownloader.git
-cd VRRookieDownloader
+git clone https://github.com/yGuilhermy/VRSideForge.git
+cd VRSideForge
 chmod +x setup.sh start.sh
 ./setup.sh
 ```
@@ -133,7 +133,7 @@ chmod +x update.sh
 - **Option 1 (Normal):** Checks the version and only updates if a newer one exists on GitHub.
 - **Option 2 (Hard Update):** Forces a full reinstall, downloading the latest source independently of the current version.
 
-Wait for the loading to finish and access http://localhost:3000 or http://vrrookie.local to use the app via browser.
+Wait for the loading to finish and access http://localhost:3000 or http://vrsideforge.local to use the app via browser.
 
 ### qBitTorrent Configuration
 
@@ -177,7 +177,7 @@ Upon first launching, the **Setup Wizard** will greet you. It automatically vali
 - Connect your Meta Quest via USB (ensure Developer Mode and USB Debugging are active).
 - Click the install button or navigate to the **Sideloading** tab to manage multiple local APKs/OBBs at once. The app will automatically push `.apk` and `.obb` files to the headset.
 
-Note: The installation may fail for some reason, probably the downloaded game has extra files needed, in this case, you should analyze and install it manually. (Try SideQuest or RookieSideload)
+Note: The installation may fail for some reason, probably the downloaded game has extra files needed, in this case, you should analyze and install it manually. (Try SideQuest or SideForge)
 
 ## ☑️ To-Do (Maybe)
 

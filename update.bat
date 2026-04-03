@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 echo.
 echo ==========================================
-echo    VR Rookie Downloader - Updater
+echo    VRSideForge - Updater
 echo ==========================================
 echo.
 echo [1] Verify Update (Default)
@@ -30,7 +30,7 @@ if "%choice%"=="2" (
 )
 echo [INFO] Local Version: !LOCAL_VERSION!
 echo [INFO] Checking GitHub...
-curl -s -L "https://raw.githubusercontent.com/yGuilhermy/VRRookieDownloader/main/package.json?t=%random%" > remote_pkg.json
+curl -s -L "https://raw.githubusercontent.com/yGuilhermy/VRSideForge/main/package.json?t=%random%" > remote_pkg.json
 set "REMOTE_VERSION="
 for /f "tokens=2 delims=:," %%a in ('findstr /i "\"version\"" remote_pkg.json') do (
     set "v=%%~a"
@@ -84,7 +84,7 @@ if exist "!BACKUP_DIR!\frontend\node_modules" (
     move "!BACKUP_DIR!\frontend\node_modules" "frontend\" >nul
 )
 echo [INFO] Downloading recent files...
-curl -L "https://github.com/yGuilhermy/VRRookieDownloader/archive/refs/heads/main.zip" -o update.zip
+curl -L "https://github.com/yGuilhermy/VRSideForge/archive/refs/heads/main.zip" -o update.zip
 if errorlevel 1 (
     echo [ERROR] Download failed.
     pause

@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 echo ==========================================
-echo    VR Rookie Downloader - Auto Starter
+echo    VRSideForge - Auto Starter
 echo ==========================================
 echo.
 

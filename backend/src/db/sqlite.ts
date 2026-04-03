@@ -9,10 +9,12 @@ let db: Database | undefined;
 export async function initDb(): Promise<Database> {
   if (db) return db;
 
-  const USER_DATA_DIR = path.join(os.homedir(), 'Documents', 'VRRookieDownloader');
-  if (!fs.existsSync(USER_DATA_DIR)) {
-    fs.mkdirSync(USER_DATA_DIR, { recursive: true });
+  const oldDir = path.join(os.homedir(), 'Documents', 'VRRookieDownloader');
+  const newDir = path.join(os.homedir(), 'Documents', 'VRSideForge');
+  if (fs.existsSync(oldDir) && !fs.existsSync(newDir)) {
+    fs.renameSync(oldDir, newDir);
   }
+  const USER_DATA_DIR = newDir;
   const dbPath = path.join(USER_DATA_DIR, 'database.sqlite');
   
   db = await open({

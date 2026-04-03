@@ -12,9 +12,9 @@ let isAdbResolved = false;
 
 const getAdbFallbackPath = (): string => {
   if (process.platform === 'win32') {
-    return path.join(os.homedir(), 'Documents', 'VRRookieDownloader', 'adb', 'adb.exe');
+    return path.join(os.homedir(), 'Documents', 'VRSideForge', 'adb', 'adb.exe');
   }
-  return path.join(os.homedir(), '.local', 'share', 'VRRookieDownloader', 'adb', 'adb');
+  return path.join(os.homedir(), '.local', 'share', 'VRSideForge', 'adb', 'adb');
 };
 
 const getAdbCommand = async () => {

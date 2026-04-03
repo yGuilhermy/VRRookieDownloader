@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 echo "=========================================="
-echo "   VR Rookie Downloader - Updater"
+echo "   VRSideForge - Linux Updater"
 echo "=========================================="
 echo
 echo "[1] Verify Update (Default)"
@@ -18,7 +18,7 @@ if [ "$choice" == "2" ]; then
 else
     echo "[INFO] Local Version: $LOCAL_VERSION"
     echo "[INFO] Checking GitHub..."
-    REMOTE_VERSION=$(curl -s "https://raw.githubusercontent.com/yGuilhermy/VRRookieDownloader/main/package.json?t=$(date +%s)" | grep '"version"' | head -n 1 | awk -F '"' '{print $4}')
+    REMOTE_VERSION=$(curl -s -L "https://raw.githubusercontent.com/yGuilhermy/VRSideForge/main/package.json?t=$RANDOM" > remote_pkg.json && grep '"version"' remote_pkg.json | head -n 1 | awk -F '"' '{print $4}')
     echo "[INFO] GitHub Version: $REMOTE_VERSION"
     if [ "$LOCAL_VERSION" == "$REMOTE_VERSION" ]; then
         echo "[INFO] The application is already up to date."
@@ -43,13 +43,13 @@ done
 [ -d "$BACKUP_DIR/backend/node_modules" ] && mkdir -p backend && mv "$BACKUP_DIR/backend/node_modules" backend/
 [ -d "$BACKUP_DIR/frontend/node_modules" ] && mkdir -p frontend && mv "$BACKUP_DIR/frontend/node_modules" frontend/
 echo "[INFO] Downloading recent files..."
-curl -L "https://github.com/yGuilhermy/VRRookieDownloader/archive/refs/heads/main.zip" -o update.zip
+curl -L "https://github.com/yGuilhermy/VRSideForge/archive/refs/heads/main.zip" -o update.zip
 echo "[INFO] Extracting files..."
 unzip -q update.zip
 rm update.zip
 echo "[INFO] Applying new files..."
-cp -af VRRookieDownloader-main/* . || cp -af VRRookieDownloader-master/* .
-rm -rf VRRookieDownloader-main VRRookieDownloader-master
+cp -af VRSideForge-main/* . || cp -af VRSideForge-master/* .
+rm -rf VRSideForge-main VRSideForge-master
 chmod +x setup.sh start.sh update.sh
 ./setup.sh
 echo "[OK] Process completed! $REMOTE_VERSION"

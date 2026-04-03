@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 echo ==========================================
-echo    VR Rookie Downloader - Installer
+echo    VRSideForge - Installer
 echo ==========================================
 echo.
 
@@ -25,7 +25,7 @@ if %errorlevel% neq 0 (
     echo [!] ADB - Android Debug Bridge - not found in PATH.
     echo Downloading official ADB - Platform Tools...
     
-    set "ADB_DIR=%USERPROFILE%\Documents\VRRookieDownloader\adb"
+    set "ADB_DIR=%USERPROFILE%\Documents\VRSideForge\adb"
     if not exist "!ADB_DIR!" mkdir "!ADB_DIR!"
     
     echo [1/3] Downloading...

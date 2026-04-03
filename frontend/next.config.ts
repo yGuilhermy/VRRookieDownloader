@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   // @ts-ignore
   allowedDevOrigins: [
-    'vrrookie.local',
-    'vrrookie.localhost',
+    'vrsideforge.local',
+    'vrsideforge.localhost',
     '100.123.106.125',
     '192.168.1.102'
   ],
