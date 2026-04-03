@@ -49,6 +49,10 @@ export default function Home() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [limit, setLimit] = useState(20);
   const [showAllGenres, setShowAllGenres] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   
   const { offlineMode, downloadPath, setDownloadPath } = useStore();
   const queryClient = useQueryClient();
@@ -182,6 +186,66 @@ export default function Home() {
     queryKey: ['torrents'],
     queryFn: async () => (api.get('/torrent/status').then(res => res.data)),
     refetchInterval: 5000,
+  });
+
+  const bulkDownloadMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      const res = await api.post('/torrent/bulk-download', { ids });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(t('home.bulk.success', { count: data.count }));
+      setSelectedIds([]);
+      setSelectionMode(false);
+      queryClient.invalidateQueries({ queryKey: ['torrents'] });
+    },
+    onError: (err: any) => toast.error(t('common.error') + ': ' + err.message)
+  });
+
+  const toggleSelection = (id: number) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const { data: updateInfo } = useQuery({
+    queryKey: ['update_check'],
+    queryFn: async () => (await api.get('/update/check')).data,
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (updateInfo) {
+      if (updateInfo.available) {
+        setShowUpdateDialog(true);
+      } else if (!updateInfo.error) {
+        toast.success(t('home.update.upToDate'), { 
+          icon: <Zap className="h-4 w-4 text-emerald-500" />,
+          duration: 3000
+        });
+      }
+    }
+  }, [updateInfo]);
+
+  const selectAllMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.get('/games/ids', {
+        params: { 
+          q: search, 
+          type: typeFilter, 
+          path: downloadPath,
+          sort,
+          genre: genreFilter,
+          developer: devFilter
+        }
+      });
+      return res.data;
+    },
+    onSuccess: (ids) => {
+      setSelectedIds(ids);
+      toast.success(t('home.bulk.selected', { count: ids.length }));
+    },
+    onError: (err: any) => toast.error(t('common.error') + ': ' + err.message)
   });
 
   const filteredGames = useMemo(() => {
@@ -425,6 +489,38 @@ export default function Home() {
           
           <div className="flex items-center gap-3">
             <Button
+              variant={selectionMode ? 'default' : 'outline'}
+              size="sm"
+              className={`gap-2 ${selectionMode ? 'bg-primary border-none text-black' : 'border-primary/20 hover:bg-primary/5'}`}
+              onClick={() => {
+                setSelectionMode(!selectionMode);
+                if (selectionMode) setSelectedIds([]);
+              }}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              <span className="hidden sm:inline">{selectionMode ? t('home.bulk.cancel') : t('home.bulk.enable')}</span>
+            </Button>
+
+            {selectionMode && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 border-primary/20 hover:bg-primary/10 animate-in fade-in slide-in-from-left-2 duration-300"
+                onClick={() => {
+                  if (selectedIds.length > 0) {
+                    setSelectedIds([]);
+                  } else {
+                    selectAllMutation.mutate();
+                  }
+                }}
+                disabled={selectAllMutation.isPending}
+              >
+                {selectAllMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                <span>{selectedIds.length > 0 ? t('home.bulk.deselectAll') : t('home.bulk.selectAll')}</span>
+              </Button>
+            )}
+
+            <Button
               variant="outline"
               size="sm"
               className="gap-2 border-primary/20 hover:bg-primary/5 flex"
@@ -452,6 +548,40 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+        {/* Floating Bulk Action Bar */}
+        {selectionMode && selectedIds.length > 0 && (
+          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-300">
+            <div className="bg-card text-card-foreground px-6 py-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-primary/20 backdrop-blur-xl flex items-center gap-6">
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground uppercase font-black tracking-widest">{t('home.bulk.title')}</span>
+                <span className="text-lg font-bold text-primary">{t('home.bulk.selected', { count: selectedIds.length })}</span>
+              </div>
+              <div className="h-8 w-[1px] bg-border/50" />
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setSelectionMode(false);
+                    setSelectedIds([]);
+                  }}
+                >
+                  {t('home.bulk.cancel')}
+                </Button>
+                <Button 
+                  className="bg-primary hover:bg-primary/90 text-black shadow-lg shadow-primary/20 gap-2"
+                  size="sm"
+                  onClick={() => bulkDownloadMutation.mutate(selectedIds)}
+                  disabled={bulkDownloadMutation.isPending}
+                >
+                  <HardDriveDownload className="h-4 w-4" />
+                  {t('home.bulk.downloadAll')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -562,122 +692,139 @@ export default function Home() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredGames.map((game) => (
-            <Link href={`/game/${game.id}`} key={game.id} className="group h-full">
-              <Card className="h-full overflow-hidden flex flex-col hover:border-primary/40 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 bg-card/40 backdrop-blur-md border-border/40 rounded-2xl group">
-                <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden border-b border-border/10">
-                  {game.image_url ? (
-                    <img
-                      src={game.image_url}
-                      alt={game.title}
-                      className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center w-full h-full">
-                      <ImageOff className="h-10 w-10 text-muted-foreground/30" />
-                    </div>
-                  )}
-                  
-                  {game.wishlist === 1 && (
-                    <div className="absolute top-3 right-3 z-30 animate-in zoom-in-50 duration-500">
-                      <div className="bg-rose-600 shadow-xl text-white p-2 rounded-full backdrop-blur-md border border-rose-400/30">
-                        <Heart className="h-4 w-4 fill-current" />
+          {filteredGames.map((game) => {
+            const isSelected = selectedIds.includes(game.id);
+            return (
+              <div 
+                key={game.id} 
+                className={`group h-full cursor-pointer relative ${selectionMode && isSelected ? 'scale-[1.02]' : ''} transition-all duration-300`}
+                onClick={(e) => {
+                  if (selectionMode) {
+                    e.preventDefault();
+                    toggleSelection(game.id);
+                  }
+                }}
+              >
+                {selectionMode && (
+                  <div className={`absolute top-4 right-4 z-40 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary shadow-lg shadow-primary/40' : 'bg-black/20 border-white/40 backdrop-blur-sm'}`}>
+                    {isSelected && <CheckCircle2 className="h-4 w-4 text-white" />}
+                  </div>
+                )}
+                <Link 
+                  href={selectionMode ? '#' : `/game/${game.id}`} 
+                  className={`block h-full ${selectionMode ? 'pointer-events-none' : ''}`}
+                >
+                  <Card className={`h-full overflow-hidden flex flex-col transition-all duration-300 ${isSelected && selectionMode ? 'border-primary ring-2 ring-primary/20 shadow-2xl shadow-primary/10' : 'hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 border-border/40'} bg-card/40 backdrop-blur-md rounded-2xl`}>
+                    <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden border-b border-border/10">
+                      {game.image_url ? (
+                        <img
+                          src={game.image_url}
+                          alt={game.title}
+                          className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full">
+                          <ImageOff className="h-10 w-10 text-muted-foreground/30" />
+                        </div>
+                      )}
+                      
+                      {!selectionMode && game.wishlist === 1 && (
+                        <div className="absolute top-3 right-3 z-30 animate-in zoom-in-50 duration-500">
+                          <div className="bg-rose-600 shadow-xl text-white p-2 rounded-full backdrop-blur-md border border-rose-400/30">
+                            <Heart className="h-4 w-4 fill-current" />
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      {(() => {
+                        const activeTorrent = torrents.find((t: any) => t.gameId === game.id);
+                        const isDownloading = !!activeTorrent;
+                        const progress = activeTorrent ? activeTorrent.progress : 0;
+                        const isPredownloading = activeTorrent?.state === 'predownload';
+                        const isFinished = (parseFloat(progress) >= 99.9) || (game.isLocalDownload && parseFloat(progress) === 0 && !activeTorrent);
+                        const showDownloading = isDownloading && !isFinished && !isPredownloading;
+
+                        return (
+                          <>
+                            {isFinished && (
+                              <div className="absolute top-3 left-3 animate-in fade-in zoom-in-50 duration-500 z-30">
+                                <Badge className="bg-emerald-500 text-white backdrop-blur-md border-none px-2.5 py-1 shadow-xl flex items-center gap-1.5 text-[10px] font-black tracking-widest rounded-full">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                  {t('home.status.downloaded')}
+                                </Badge>
+                              </div>
+                            )}
+                            {isPredownloading && (
+                              <div className="absolute top-3 left-3 animate-in fade-in zoom-in-50 duration-500 z-30">
+                                <Badge className="bg-purple-600 text-white backdrop-blur-md border-none px-2.5 py-1 shadow-xl flex items-center gap-1.5 text-[10px] font-black tracking-widest rounded-full">
+                                  <RefreshCw className="h-3 w-3 animate-spin" />
+                                  {t('home.status.predownload')}
+                                </Badge>
+                              </div>
+                            )}
+                            {showDownloading && (
+                              <div className="absolute top-3 left-3 flex flex-col gap-1.5 w-36 animate-in fade-in zoom-in-50 duration-500 z-30">
+                                <Badge className="bg-indigo-600 text-white backdrop-blur-md border-none shadow-xl flex items-center gap-1.5 text-[10px] font-black tracking-widest w-full justify-center py-1 rounded-full">
+                                  <Activity className="h-3 w-3 animate-pulse" />
+                                  {t('home.status.downloading')} {progress}%
+                                </Badge>
+                                <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden backdrop-blur-md p-[1px] border border-white/10">
+                                  <div 
+                                    className="bg-indigo-400 h-full rounded-full shadow-[0_0_8px_rgba(129,140,248,0.6)] transition-all duration-1000 ease-in-out" 
+                                    style={{ width: `${progress}%` }} 
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+
+                      <div className="absolute bottom-3 right-3 flex flex-wrap gap-1.5 items-end justify-end z-30 max-w-[80%]">
+                        {((translateMode && game.translated_title ? game.translated_title : game.title).match(/\[.*?\]/g) || []).map((tTag, i) => {
+                          const translated = translateTag(tTag);
+                          if (
+                            translated.toLowerCase() === 'eng' || 
+                            translated.toLowerCase() === 'rus' ||
+                            translated.toLowerCase().includes('meta quest') ||
+                            translated.toLowerCase().includes('vr meta')
+                          ) return null;
+                          
+                          return (
+                            <Badge key={i} className="bg-black/70 backdrop-blur-md text-white border-white/10 text-[9px] px-2 py-0.5 rounded-full uppercase tracking-tighter font-black shadow-lg">
+                              {translated}
+                            </Badge>
+                          );
+                        })}
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  {(() => {
-                    // Busca por gameId — exato e sem ambiguidade de nome
-                    const activeTorrent = torrents.find((t: any) => t.gameId === game.id);
                     
-                    const isDownloading = !!activeTorrent;
-                    const progress = activeTorrent ? activeTorrent.progress : 0;
+                    <CardContent className="p-4 flex-1 flex flex-col justify-start gap-1">
+                      <CardTitle className="text-sm font-bold line-clamp-2 leading-tight tracking-tight group-hover:text-primary transition-colors duration-300 uppercase">
+                        {cleanTitle(game)}
+                      </CardTitle>
+                      {game.isLocalDownload && (
+                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider flex items-center gap-1">
+                          <CheckCircle2 className="h-2.5 w-2.5" /> {t('home.status.installed')}
+                        </p>
+                      )}
+                    </CardContent>
                     
-                    const isPredownloading = activeTorrent?.state === 'predownload';
-                    
-                    // Só considera finalizado se o progresso for alto OU se o backend marcou como local e não há torrent ativo lento
-                    const isFinished = (parseFloat(progress) >= 99.9) || (game.isLocalDownload && parseFloat(progress) === 0 && !activeTorrent);
-                    const showDownloading = isDownloading && !isFinished && !isPredownloading;
-
-                    return (
-                      <>
-                        {isFinished && (
-                          <div className="absolute top-3 left-3 animate-in fade-in zoom-in-50 duration-500 z-30">
-                            <Badge className="bg-emerald-500 text-white backdrop-blur-md border-none px-2.5 py-1 shadow-xl flex items-center gap-1.5 text-[10px] font-black tracking-widest rounded-full">
-                              <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                              {t('home.status.downloaded')}
-                            </Badge>
-                          </div>
-                        )}
-                        {isPredownloading && (
-                          <div className="absolute top-3 left-3 animate-in fade-in zoom-in-50 duration-500 z-30">
-                            <Badge className="bg-purple-600 text-white backdrop-blur-md border-none px-2.5 py-1 shadow-xl flex items-center gap-1.5 text-[10px] font-black tracking-widest rounded-full">
-                              <RefreshCw className="h-3 w-3 animate-spin" />
-                              {t('home.status.predownload')}
-                            </Badge>
-                          </div>
-                        )}
-                        {showDownloading && (
-                          <div className="absolute top-3 left-3 flex flex-col gap-1.5 w-36 animate-in fade-in zoom-in-50 duration-500 z-30">
-                            <Badge className="bg-indigo-600 text-white backdrop-blur-md border-none shadow-xl flex items-center gap-1.5 text-[10px] font-black tracking-widest w-full justify-center py-1 rounded-full">
-                              <Activity className="h-3 w-3 animate-pulse" />
-                              {t('home.status.downloading')} {progress}%
-                            </Badge>
-                            <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden backdrop-blur-md p-[1px] border border-white/10">
-                              <div 
-                                className="bg-indigo-400 h-full rounded-full shadow-[0_0_8px_rgba(129,140,248,0.6)] transition-all duration-1000 ease-in-out" 
-                                style={{ width: `${progress}%` }} 
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-
-                  <div className="absolute bottom-3 right-3 flex flex-wrap gap-1.5 items-end justify-end z-30 max-w-[80%]">
-                    {((translateMode && game.translated_title ? game.translated_title : game.title).match(/\[.*?\]/g) || []).map((t, i) => {
-                      const translated = translateTag(t);
-                      if (
-                        translated.toLowerCase() === 'eng' || 
-                        translated.toLowerCase() === 'rus' ||
-                        translated.toLowerCase().includes('meta quest') ||
-                        translated.toLowerCase().includes('vr meta')
-                      ) return null;
-                      
-                      return (
-                        <Badge key={i} className="bg-black/70 backdrop-blur-md text-white border-white/10 text-[9px] px-2 py-0.5 rounded-full uppercase tracking-tighter font-black shadow-lg">
-                          {translated}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                <CardContent className="p-4 flex-1 flex flex-col justify-start gap-1">
-                  <CardTitle className="text-sm font-bold line-clamp-2 leading-tight tracking-tight group-hover:text-primary transition-colors duration-300 uppercase">
-                    {cleanTitle(game)}
-                  </CardTitle>
-                  {game.isLocalDownload && (
-                    <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="h-2.5 w-2.5" /> {t('home.status.installed')}
-                    </p>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="px-5 py-3 text-[11px] font-black text-muted-foreground/50 flex justify-between items-center border-t border-white/5 bg-white/[0.02] mt-auto">
-                  <div className="flex items-center gap-1.5 uppercase tracking-[0.1em]">
-                    <HardDriveDownload className="h-3.5 w-3.5 text-primary/60" />
-                    {game.size}
-                  </div>
-                  <div className="w-1.5 h-1.5 rounded-full bg-border/30" />
-                </CardFooter>
-              </Card>
-            </Link>
-          ))}
+                    <CardFooter className="px-5 py-3 text-[11px] font-black text-muted-foreground/50 flex justify-between items-center border-t border-white/5 bg-white/[0.02] mt-auto">
+                      <div className="flex items-center gap-1.5 uppercase tracking-[0.1em]">
+                        <HardDriveDownload className="h-3.5 w-3.5 text-primary/60" />
+                        {game.size}
+                      </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-border/30" />
+                    </CardFooter>
+                  </Card>
+                </Link>
+              </div>
+            );
+          })}
         </div>
 
         {/* Pagination and Items Per Page */}
@@ -815,6 +962,45 @@ export default function Home() {
                 className="bg-emerald-600 hover:bg-emerald-700"
               >
                 {manualIndexMutation.isPending ? t('common.loading') : t('common.save')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Update Dialog */}
+        <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+          <DialogContent className="sm:max-w-[425px] bg-card/95 backdrop-blur-xl border-primary/20">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-2xl">
+                <Zap className="h-6 w-6 text-primary animate-pulse" />
+                {t('home.update.available')}
+              </DialogTitle>
+              <DialogDescription className="pt-4 text-lg">
+                {t('home.update.description', { version: updateInfo?.remoteVersion })}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-3 py-4">
+              <div className="flex items-center justify-between px-4 py-2 bg-muted/50 rounded-lg border border-border/50">
+                <span className="text-sm text-muted-foreground uppercase tracking-widest font-bold">Local</span>
+                <span className="font-mono font-bold text-primary">{updateInfo?.localVersion}</span>
+              </div>
+              <div className="flex items-center justify-between px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                <span className="text-sm text-primary uppercase tracking-widest font-bold">GitHub</span>
+                <span className="font-mono font-bold text-primary">{updateInfo?.remoteVersion}</span>
+              </div>
+            </div>
+            <DialogFooter className="flex flex-row gap-2 sm:justify-end">
+              <Button variant="ghost" onClick={() => setShowUpdateDialog(false)}>
+                {t('home.update.ignore')}
+              </Button>
+              <Button 
+                className="bg-primary text-black hover:bg-primary/90 gap-2 shadow-lg shadow-primary/20"
+                onClick={() => {
+                  window.open(updateInfo?.githubUrl, '_blank');
+                  setShowUpdateDialog(false);
+                }}
+              >
+                <Globe className="h-4 w-4" />
+                {t('home.update.view')}
               </Button>
             </DialogFooter>
           </DialogContent>

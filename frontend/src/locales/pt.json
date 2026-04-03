@@ -135,6 +135,23 @@
       "custom": "Custom",
       "page": "Página",
       "of": "de"
+    },
+    "bulk": {
+      "title": "Seleção Múltipla",
+      "selected": "{{count}} selecionados",
+      "downloadAll": "Baixar Selecionados",
+      "cancel": "Cancelar",
+      "enable": "Selecionar",
+      "selectAll": "Selecionar Tudo",
+      "deselectAll": "Desmarcar Tudo",
+      "success": "Download em massa iniciado para {{count}} itens."
+    },
+    "update": {
+      "available": "Nova Atualização!",
+      "description": "Versão {{version}} disponível. Deseja atualizar?",
+      "view": "Ver no GitHub",
+      "ignore": "Depois",
+      "upToDate": "Seu app está atualizado!"
     }
   },
   "sideload": {
@@ -323,7 +340,7 @@
     "info": "Informações",
     "legal": "Aviso Legal",
     "poweredBy": "Powered by ADB",
-    "beta": "Beta 0.1.2!",
+    "beta": "Beta 0.1.3!",
     "copyright": "Todos os direitos reservados",
     "madeWith": "Feito com",
     "forEnthusiasts": "para entusiastas de Realidade Virtual"
