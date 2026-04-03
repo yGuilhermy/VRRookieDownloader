@@ -16,7 +16,6 @@
   <a href="https://nodejs.org/" target="_blank"><img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"/></a>
   <a href="https://nextjs.org/" target="_blank"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"/></a>
   <a href="https://www.typescriptlang.org/" target="_blank"><img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/></a>
-  <a href="https://www.electronjs.org/" target="_blank"><img src="https://img.shields.io/badge/Electron-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron"/></a>
 </p>
 
 ## Aviso Legal (Disclaimer)
@@ -43,6 +42,7 @@ O **VR Rookie Downloader** é uma ferramenta de indexação técnica. É imperat
 **Captura automatizada de metadados diretamente do fórum original**
 
 - Extração de **Gênero**, **Versão**, **Desenvolvedor** e estatísticas de **Seeds/Leechers**.
+
 ### Automação & Atualizações
 
 **Mantendo seu app atualizado e sincronizado**
@@ -58,6 +58,7 @@ O **VR Rookie Downloader** é uma ferramenta de indexação técnica. É imperat
 
 - Controle remoto de downloads.
 - Monitoramento de progresso em tempo real diretamente na biblioteca.
+- **Sistema de Bulk Download:** Selecione múltiplos jogos no catálogo e inicie todos os downloads simultaneamente para o qBitTorrent com um único clique.
 - Sincronização automática entre arquivos físicos no HD e o banco de dados.
 
 ### Sideloading
@@ -81,6 +82,7 @@ O **VR Rookie Downloader** é uma ferramenta de indexação técnica. É imperat
 Clone o repositório e execute o script de instalação para sua plataforma:
 
 **Windows:**
+
 ```powershell
 git clone https://github.com/yGuilhermy/VRRookieDownloader.git
 cd VRRookieDownloader
@@ -88,6 +90,7 @@ cd VRRookieDownloader
 ```
 
 **Linux (Debian/Ubuntu):**
+
 ```bash
 git clone https://github.com/yGuilhermy/VRRookieDownloader.git
 cd VRRookieDownloader
@@ -98,11 +101,13 @@ chmod +x setup.sh start.sh
 #### 3. Executar
 
 **Windows:**
+
 ```powershell
 .\start.bat
 ```
 
 **Linux:**
+
 ```bash
 ./start.sh
 ```
@@ -112,11 +117,13 @@ chmod +x setup.sh start.sh
 Para verificar e instalar atualizações automaticamente:
 
 **Windows:**
+
 ```powershell
 .\update.bat
 ```
 
 **Linux:**
+
 ```bash
 chmod +x update.sh
 ./update.sh

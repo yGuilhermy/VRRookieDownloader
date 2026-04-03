@@ -58,6 +58,7 @@
 
 - Remote control of downloads.
 - Real-time progress monitoring directly in the library.
+- **Bulk Download System:** Select multiple games in the catalog and start all downloads simultaneously to qBitTorrent with a single click.
 - Automatic synchronization between physical files on the HDD and the database.
 
 ### Sideloading
