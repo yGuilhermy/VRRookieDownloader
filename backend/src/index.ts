@@ -114,7 +114,6 @@ function loadSettings() {
       "https://rutracker.me/forum/viewtopic.php?t=6676369",
       "https://rutracker.me/forum/viewtopic.php?t=6287745",
       "https://rutracker.me/forum/viewtopic.php?t=6422377",
-      "https://rutracker.me/forum/viewtopic.php?t=6422377",
       "https://rutracker.me/forum/viewtopic.php?t=6683851"
     ]
   };
@@ -290,6 +289,42 @@ app.get('/api/session/status', async (req, res) => {
   }
 });
 
+// --- Inventory Management ---
+app.get('/api/inventory', (req, res) => {
+  const dir = globalDownloadPath || '';
+  if (!dir || !fs.existsSync(dir)) return res.json({});
+  const inventory = getInventory(dir);
+  res.json(inventory.downloads || {});
+});
+
+app.post('/api/inventory/update', (req, res) => {
+  const { hash, data } = req.body;
+  const dir = globalDownloadPath || '';
+  if (!dir || !fs.existsSync(dir)) return res.status(400).json({ error: 'Diretório não configurado' });
+  
+  const inventory = getInventory(dir);
+  if (!inventory.downloads) inventory.downloads = {};
+  
+  // Se estiver atualizando um hash existente ou criando novo
+  inventory.downloads[hash] = { ...inventory.downloads[hash], ...data };
+  
+  updateInventory(dir, inventory);
+  res.json({ success: true });
+});
+
+app.post('/api/inventory/remove', (req, res) => {
+  const { hash } = req.body;
+  const dir = globalDownloadPath || '';
+  if (!dir || !fs.existsSync(dir)) return res.status(400).json({ error: 'Diretório não configurado' });
+  
+  const inventory = getInventory(dir);
+  if (inventory.downloads && inventory.downloads[hash]) {
+    delete inventory.downloads[hash];
+    updateInventory(dir, inventory);
+  }
+  res.json({ success: true });
+});
+
 app.get('/api/session/validate', async (req, res) => {
   // Opens non-headless browser to let user authenticate on Rutracker
   try {
@@ -346,15 +381,11 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // --- Games ---
-app.get('/api/games', async (req, res) => {
-  const db = getDb();
-  const { type, q, page = '1', limit = '20', sort = 'time', genre, developer } = req.query;
+function buildGamesQuery(req: any) {
+  const { type, q, page = '1', limit = '20', sort = 'time', genre, developer, path: pathQuery } = req.query;
   const p = parseInt(page as string);
   const l = parseInt(limit as string);
   const offset = (p - 1) * l;
-  
-  const pathQuery = req.query.path as string;
-  if (pathQuery) globalDownloadPath = pathQuery; // Update global path for monitor
   
   const inventory = getInventory(pathQuery || globalDownloadPath || '');
   const invEntries = Object.values(inventory.downloads || {}) as any[];
@@ -369,7 +400,6 @@ app.get('/api/games', async (req, res) => {
       baseQuery += ` AND id IN (${placeholders})`;
       params.push(...indexedIds);
     } else {
-      // Se não houver nada indexado, forçamos retorno vazio
       baseQuery += ' AND 1 = 0';
     }
   } else if (type === 'wishlist') {
@@ -405,46 +435,48 @@ app.get('/api/games', async (req, res) => {
   if (sort === 'seeds') orderBy = 'seeds DESC';
   if (sort === 'leeches') orderBy = 'leeches DESC';
 
+  return { baseQuery, params, limit: l, offset, orderBy, invEntries };
+}
+
+app.get('/api/games', async (req, res) => {
+  const db = getDb();
+  const { baseQuery, params, limit, offset, orderBy, invEntries } = buildGamesQuery(req);
+  
   const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
   const dataQuery = `SELECT * ${baseQuery} ORDER BY ${orderBy} LIMIT ? OFFSET ?`;
   
   const totalRes = await db.get(countQuery, params);
-  const games = await db.all(dataQuery, [...params, l, offset]);
+  const games = await db.all(dataQuery, [...params, limit, offset]);
   
-  let activeTorrents: any[] = [];
-  try {
-    if (!qbitCookie) await loginQbit();
-    const torrentRes = await axios.get('http://localhost:8080/api/v2/torrents/info', {
-      headers: { 'Cookie': qbitCookie },
-      timeout: 2000
-    });
-    activeTorrents = torrentRes.data;
-  } catch (e) {}
-
   let gamesWithStatus = games.map((game: any) => {
     let isLocal = false;
     let isDownloading = false;
     let torrentProgress = 0;
     let localPath = '';
-
     const invItem = invEntries.find(item => item.gameId === game.id);
-
     if (invItem) {
       isLocal = invItem.status === 'concluido';
       isDownloading = invItem.status === 'download' || invItem.status === 'predownload';
       torrentProgress = invItem.progress || 0;
       localPath = invItem.folderName || '';
     }
-
     return { ...game, isLocalDownload: isLocal, localPath, isDownloading, torrentProgress: parseFloat(torrentProgress.toFixed(1)) };
   });
 
   res.json({
     games: gamesWithStatus,
     total: totalRes.total,
-    pages: Math.ceil(totalRes.total / l),
-    currentPage: p
+    pages: Math.ceil(totalRes.total / limit),
+    currentPage: parseInt(req.query.page as string || '1')
   });
+});
+
+app.get('/api/games/ids', async (req, res) => {
+  const db = getDb();
+  const { baseQuery, params } = buildGamesQuery(req);
+  const query = `SELECT id ${baseQuery}`;
+  const rows = await db.all(query, params);
+  res.json(rows.map(r => r.id));
 });
 
 app.get('/api/filters', async (req, res) => {
@@ -792,106 +824,118 @@ async function loginQbit() {
   }
 }
 
-app.post('/api/torrent/download', async (req, res) => {
-  const { magnet, gameId } = req.body;
+async function startDownloadInBackend(magnet: string, gameId: number) {
   const savepath = globalDownloadPath;
+  if (!magnet || !savepath) throw new Error('Faltam dados para o download');
+
+  const parsed: any = parseTorrent(magnet);
+  const hash = parsed.infoHash;
+  if (!hash) throw new Error('Magnet ou Link inválido');
+
+  const inventory = getInventory(savepath);
+  inventory.downloads[hash] = {
+    gameId: gameId || 0,
+    folderName: 'Obtendo metadados...',
+    hash,
+    status: 'predownload',
+    fileTree: [],
+    progress: 0,
+    addedAt: new Date().toISOString()
+  };
+  updateInventory(savepath, inventory);
   
-  if (!magnet || !savepath) return res.status(400).json({ error: 'Faltam dados para o download (Caminho não configurado no servidor?)' });
+  io.emit('torrent_status_update', { hash, status: 'predownload' });
 
-  try {
-    const parsed: any = parseTorrent(magnet);
-    const hash = parsed.infoHash;
-    if (!hash) throw new Error('Magnet ou Link inválido');
-
-    globalDownloadPath = savepath;
-    const inventory = getInventory(savepath);
-
-    inventory.downloads[hash] = {
-      gameId: gameId || 0,
-      folderName: 'Obtendo metadados...',
-      hash,
-      status: 'predownload',
-      fileTree: [],
-      progress: 0,
-      addedAt: new Date().toISOString()
-    };
-    updateInventory(savepath, inventory);
-    
-    // Notifica o frontend imediatamente via Socket.io para trocar o botão para Predownload (Req 1)
-    io.emit('torrent_status_update', { hash, status: 'predownload' });
-
-    // Helper to add to qBit (prevents code repetition)
-    const sendToQbit = async () => {
-      try {
-        if (!qbitCookie) await loginQbit();
-        const params = new URLSearchParams();
-        params.append('urls', magnet);
-        params.append('savepath', savepath);
-        
-        await axios.post('http://localhost:8080/api/v2/torrents/add', params.toString(), {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Cookie': qbitCookie
-          }
-        });
-        console.log(`[qBit] Torrent ${hash} enviado com sucesso.`);
-      } catch (err: any) {
-        console.error('[qBit] Falha ao enviar:', err.message);
-      }
-    };
-
-    let metadataExtracted = false;
-    const timeoutMs = 90000; // 1:30 min
-
-    const timeoutHandle = setTimeout(() => {
-      if (!metadataExtracted) {
-        console.log(`[Download] Timeout de metadados para ${hash}. Forçando envio ao qBit.`);
-        const inv = getInventory(savepath);
-        if (inv.downloads[hash]) {
-          inv.downloads[hash].status = 'download';
-          inv.downloads[hash].folderName = 'Sincronizando...'; // Monitor irá preencher
-          updateInventory(savepath, inv);
-        }
-        
-        // Destruir handler do WebTorrent
-        const wtInstance: any = wt.get(hash);
-        if (wtInstance) wtInstance.destroy();
-
-        sendToQbit();
-      }
-    }, timeoutMs);
-
-    // Step 2: Extract file tree via WebTorrent before sending to qBit
-    wt.add(magnet, (torrent: any) => {
-      metadataExtracted = true;
-      clearTimeout(timeoutHandle);
+  const sendToQbit = async () => {
+    try {
+      if (!qbitCookie) await loginQbit();
+      const params = new URLSearchParams();
+      params.append('urls', magnet);
+      params.append('savepath', savepath);
       
-      console.log(`[WT] Metadados recebidos para ${torrent.name}`);
+      await axios.post('http://localhost:8080/api/v2/torrents/add', params.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cookie': qbitCookie
+        }
+      });
+      console.log(`[qBit] Torrent ${hash} enviado com sucesso.`);
+    } catch (err: any) {
+      console.error('[qBit] Falha ao enviar:', err.message);
+    }
+  };
+
+  let metadataExtracted = false;
+  const timeoutMs = 90000;
+
+  const timeoutHandle = setTimeout(() => {
+    if (!metadataExtracted) {
+      console.log(`[Download] Timeout de metadados para ${hash}. Forçando envio ao qBit.`);
       const inv = getInventory(savepath);
       if (inv.downloads[hash]) {
-        inv.downloads[hash].folderName = torrent.name;
-        inv.downloads[hash].fileTree = torrent.files.map((f: any) => ({ 
-          name: f.name, 
-          size: f.length, 
-          path: f.path 
-        }));
         inv.downloads[hash].status = 'download';
+        inv.downloads[hash].folderName = 'Sincronizando...';
         updateInventory(savepath, inv);
       }
-      
-      // Destroy WT since qBit will handle the heavy lifting
-      torrent.destroy();
-
-      // Step 3: Add to qBitTorrent
+      const wtInstance: any = wt.get(hash);
+      if (wtInstance) wtInstance.destroy();
       sendToQbit();
-    });
+    }
+  }, timeoutMs);
 
-    res.json({ success: true, message: 'Predownload iniciado. Verifique o status em breve.' });
+  wt.add(magnet, (torrent: any) => {
+    metadataExtracted = true;
+    clearTimeout(timeoutHandle);
+    
+    console.log(`[WT] Metadados recebidos para ${torrent.name}`);
+    const inv = getInventory(savepath);
+    if (inv.downloads[hash]) {
+      inv.downloads[hash].folderName = torrent.name;
+      inv.downloads[hash].fileTree = torrent.files.map((f: any) => ({ 
+        name: f.name, 
+        size: f.length, 
+        path: f.path 
+      }));
+      inv.downloads[hash].status = 'download';
+      updateInventory(savepath, inv);
+    }
+    torrent.destroy();
+    sendToQbit();
+  });
+}
+
+app.post('/api/torrent/download', async (req, res) => {
+  const { magnet, gameId } = req.body;
+  try {
+    await startDownloadInBackend(magnet, gameId);
+    res.json({ success: true, message: 'Predownload iniciado.' });
   } catch (err: any) {
-    console.error(`[Download] Error: ${err.message}`);
     res.status(500).json({ error: err.message });
   }
 });
+
+app.post('/api/torrent/bulk-download', async (req, res) => {
+  const { ids } = req.body;
+  if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'IDs inválidos' });
+
+  const db = getDb();
+  try {
+    const placeholders = ids.map(() => '?').join(',');
+    const games = await db.all(`SELECT id, magnet FROM games WHERE id IN (${placeholders})`, ids);
+    
+    for (const game of games) {
+      if (game.magnet) {
+        startDownloadInBackend(game.magnet, game.id).catch(e => console.error(`[Bulk] Error downloading ${game.id}:`, e.message));
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    res.json({ success: true, count: games.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 app.get('/api/settings', (req, res) => {
   res.json({ 
@@ -1290,6 +1334,44 @@ app.post('/api/adb/install', async (req, res) => {
 });
 
 
+
+async function checkUpdate() {
+  try {
+    const pkgPath = path.join(__dirname, '../../package.json');
+    if (!fs.existsSync(pkgPath)) return { available: false };
+
+    const localPkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    const localVersion = localPkg.version;
+    const remoteUrl = 'https://raw.githubusercontent.com/yGuilhermy/VRRookieDownloader/main/package.json';
+    
+    // Bypass GitHub cache for raw content with a timestamp
+    const remoteRes = await axios.get(`${remoteUrl}?t=${Date.now()}`, { timeout: 8000 });
+    const remotePkg = remoteRes.data;
+    const remoteVersion = remotePkg.version;
+
+    const v1 = localVersion.split('.').map(Number);
+    const v2 = remoteVersion.split('.').map(Number);
+    let available = false;
+    for (let i = 0; i < 3; i++) {
+       if (v2[i] > v1[i]) { available = true; break; }
+       if (v2[i] < v1[i]) { available = false; break; }
+    }
+
+    return { 
+      available, 
+      localVersion, 
+      remoteVersion, 
+      githubUrl: 'https://github.com/yGuilhermy/VRRookieDownloader' 
+    };
+  } catch (e) {
+    return { available: false, error: 'Fail to fetch update info' };
+  }
+}
+
+app.get('/api/update/check', async (req, res) => {
+  const info = await checkUpdate();
+  res.json(info);
+});
 
 const PORT = Number(process.env.PORT) || 4000;
 
