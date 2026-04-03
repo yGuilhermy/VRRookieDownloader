@@ -143,6 +143,12 @@ let globalOfflineMode = settings.offlineMode;
 let globalStart = settings.start;
 let globalBlacklist = settings.blacklist || [];
 
+// Routes definitions should follow
+app.get('/api/update/check', async (req, res) => {
+  const info = await checkUpdate();
+  res.json(info);
+});
+
 export function getTranslationLanguage() {
   return globalTranslationLanguage;
 }
@@ -471,12 +477,19 @@ app.get('/api/games', async (req, res) => {
   });
 });
 
-app.get('/api/games/ids', async (req, res) => {
-  const db = getDb();
-  const { baseQuery, params } = buildGamesQuery(req);
-  const query = `SELECT id ${baseQuery}`;
-  const rows = await db.all(query, params);
-  res.json(rows.map(r => r.id));
+app.get('/api/all-game-ids', async (req, res) => {
+  console.log('[API] Received request for all-game-ids');
+  try {
+    const db = getDb();
+    const { baseQuery, params } = buildGamesQuery(req);
+    const query = `SELECT id ${baseQuery}`;
+    const rows = await db.all(query, params);
+    console.log(`[API] Returning ${rows.length} game IDs`);
+    res.json(rows.map(r => r.id));
+  } catch (err: any) {
+    console.error('[API] Error in all-game-ids:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/filters', async (req, res) => {

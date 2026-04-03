@@ -232,7 +232,7 @@ export default function Home() {
 
   const selectAllMutation = useMutation({
     mutationFn: async () => {
-      const res = await api.get('/games/ids', {
+      const res = await api.get('/all-game-ids', {
         params: { 
           q: search, 
           type: typeFilter, 
