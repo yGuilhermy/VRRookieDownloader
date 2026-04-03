@@ -1,6 +1,6 @@
 {
   "name": "vrrookiedownloader",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Um aplicativo fullstack (backend + frontend) para indexar, organizar e traduzir itens VR do fórum (rutracker.org).",
   "main": "index.js",
   "scripts": {

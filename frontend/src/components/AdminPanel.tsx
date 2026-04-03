@@ -48,7 +48,7 @@ export default function AdminPanel() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.delete(`/games/${id}`),
     onSuccess: () => {
-      toast.success(t('admin.table.noGenre')); // Using a generic success or adding new ones
+      toast.success(t('admin.deleteSuccess'));
       queryClient.invalidateQueries({ queryKey: ['admin_games'] });
       queryClient.invalidateQueries({ queryKey: ['games'] });
     },
@@ -113,8 +113,9 @@ export default function AdminPanel() {
   const applyBackupMutation = useMutation({
     mutationFn: (tempPath: string) => api.post('/db/import/apply', { tempPath }),
     onSuccess: () => {
-      toast.success(t('admin.backup.confirm'));
+      toast.success(t('admin.backupApplied'));
       setBackupConfirm(null);
+      toast.info(t('admin.reloading'));
       setTimeout(() => window.location.reload(), 1500);
     },
     onError: (err: any) => toast.error(err.response?.data?.error || t('common.error'))
@@ -274,7 +275,8 @@ export default function AdminPanel() {
             variant="outline" 
             className="border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
             onClick={() => {
-              if(confirm(t('admin.rebuildAll.confirm', { lang: translationLanguage === 'pt' ? 'Português' : 'English' }))) {
+              const langLabel = translationLanguage === 'pt' ? 'Português' : 'English';
+              if(confirm(t('admin.rebuildAll.confirm', { lang: langLabel }))) {
                 rebuildAllMutation.mutate();
               }
             }}
@@ -433,7 +435,7 @@ export default function AdminPanel() {
               {blacklistItems.map((url: string) => (
                 <TableRow key={url} className="group hover:bg-rose-500/5 transition-colors">
                   <TableCell className="font-mono text-xs w-[80px] text-muted-foreground text-center">
-                    URL
+                    ID
                   </TableCell>
                   <TableCell>
                     <a href={url} target="_blank" rel="noreferrer" className="text-sm font-medium hover:underline text-rose-500/80">
@@ -552,7 +554,7 @@ export default function AdminPanel() {
           {backupConfirm && (
             <div className="bg-muted/50 p-4 rounded-xl text-sm space-y-2 font-mono">
               <p><strong>{t('admin.backup.details.created')}:</strong> {new Date(backupConfirm.metadata.created_at).toLocaleString()}</p>
-              <p><strong>{t('admin.backup.details.code')}:</strong> <span className="text-emerald-500 font-bold blur-sm hover:blur-none transition-all duration-300 cursor-help select-none" title="Passe o mouse para revelar">{backupConfirm.metadata.validation_code}</span></p>
+              <p><strong>{t('admin.backup.details.code')}:</strong> <span className="text-emerald-500 font-bold blur-sm hover:blur-none transition-all duration-300 cursor-help select-none" title={t('admin.hoverToReveal')}>{backupConfirm.metadata.validation_code}</span></p>
               <p><strong>{t('admin.backup.details.files')}:</strong> {backupConfirm.metadata.files.join(', ')}</p>
             </div>
           )}

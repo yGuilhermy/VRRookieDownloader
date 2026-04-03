@@ -114,7 +114,14 @@ function loadSettings() {
       "https://rutracker.me/forum/viewtopic.php?t=6676369",
       "https://rutracker.me/forum/viewtopic.php?t=6287745",
       "https://rutracker.me/forum/viewtopic.php?t=6422377",
-      "https://rutracker.me/forum/viewtopic.php?t=6683851"
+      "https://rutracker.me/forum/viewtopic.php?t=6683851",
+      "https://rutracker.org/forum/viewtopic.php?t=6167995",
+      "https://rutracker.org/forum/viewtopic.php?t=5898319",
+      "https://rutracker.org/forum/viewtopic.php?t=6245250",
+      "https://rutracker.org/forum/viewtopic.php?t=6245254",
+      "https://rutracker.org/forum/viewtopic.php?t=6247834",
+      "https://rutracker.org/forum/viewtopic.php?t=5851345",
+      "https://rutracker.org/forum/viewtopic.php?t=5860681"
     ]
   };
 
@@ -475,21 +482,6 @@ app.get('/api/games', async (req, res) => {
     pages: Math.ceil(totalRes.total / limit),
     currentPage: parseInt(req.query.page as string || '1')
   });
-});
-
-app.get('/api/all-game-ids', async (req, res) => {
-  console.log('[API] Received request for all-game-ids');
-  try {
-    const db = getDb();
-    const { baseQuery, params } = buildGamesQuery(req);
-    const query = `SELECT id ${baseQuery}`;
-    const rows = await db.all(query, params);
-    console.log(`[API] Returning ${rows.length} game IDs`);
-    res.json(rows.map(r => r.id));
-  } catch (err: any) {
-    console.error('[API] Error in all-game-ids:', err.message);
-    res.status(500).json({ error: err.message });
-  }
 });
 
 app.get('/api/filters', async (req, res) => {

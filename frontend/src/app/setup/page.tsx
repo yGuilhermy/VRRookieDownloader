@@ -41,7 +41,7 @@ export default function SetupPage() {
       await api.post('/settings', { start: false });
       router.push('/');
     } catch (err: any) {
-      toast.error('Erro ao finalizar: ' + err.message);
+      toast.error(t('setup.errorFinalize') + err.message);
       setLoading(false);
     }
   };
@@ -111,19 +111,19 @@ export default function SetupPage() {
 
   const manualLogin = async () => {
     setLoading(true);
-    toast.info('Navegador aberto. Faça login no RuTracker...');
+    toast.info(t('setup.step4.info'));
     try {
       const res = await api.get('/session/validate');
       if (res.data?.success) {
         setSuccess(true);
-        toast.success('Login bem-sucedido!');
+        toast.success(t('setup.step4.loginSuccess'));
       } else {
         setSuccess(false);
-        toast.error('Falha no login ou timeout.');
+        toast.error(t('setup.step4.loginFail'));
       }
     } catch {
       setSuccess(false);
-      toast.error('Erro ao conectar.');
+      toast.error(t('setup.step4.connectError'));
     } finally {
       setLoading(false);
     }
@@ -136,7 +136,7 @@ export default function SetupPage() {
       await api.post('/settings', { downloadPath });
       setSuccess(true);
     } catch (err: any) {
-      toast.error('Erro ao salvar caminho: ' + err.message);
+      toast.error(t('setup.step5.error') + err.message);
       setSuccess(false);
     } finally {
       setLoading(false);
@@ -148,7 +148,7 @@ export default function SetupPage() {
     setLoading(true);
     try {
       await api.post('/scraper/start');
-      toast.success('Scraper iniciado!');
+      toast.success(t('setup.step6.started'));
       handleFinish();
     } catch (err: any) {
       toast.error('Erro: ' + err.message);
@@ -269,7 +269,7 @@ export default function SetupPage() {
                 <div className="flex flex-col items-center gap-4 text-rose-500 w-full">
                   <AlertBox message={t('setup.step2.fail')} icon={<XCircle className="w-8 h-8 text-rose-500 shrink-0" />} />
                   <Button variant="outline" onClick={checkAdb} className="mt-4 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30">
-                    <MonitorSmartphone className="w-4 h-4 mr-2" /> Tentar Novamente
+                    <MonitorSmartphone className="w-4 h-4 mr-2" /> {t('common.retry')}
                   </Button>
                 </div>
               )}
@@ -294,7 +294,7 @@ export default function SetupPage() {
                     <AlertBox message={t('setup.step3.failRunningNoWebUI')} icon={<XCircle className="w-8 h-8 text-amber-500 shrink-0" />} isWarning={true} />
                   )}
                   <Button variant="outline" onClick={checkQbit} className="mt-4 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30">
-                    <DownloadCloud className="w-4 h-4 mr-2" /> Tentar Novamente
+                    <DownloadCloud className="w-4 h-4 mr-2" /> {t('common.retry')}
                   </Button>
                 </div>
               )}
@@ -307,7 +307,7 @@ export default function SetupPage() {
               {loading ? (
                 <div className="flex flex-col items-center gap-4">
                   <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                  <p className="text-muted-foreground animate-pulse">Aguardando login no navegador...</p>
+                  <p className="text-muted-foreground animate-pulse">{t('setup.step4.waiting')}</p>
                 </div>
               ) : success === true ? (
                 <div className="flex flex-col items-center gap-4 text-emerald-500">
@@ -316,7 +316,7 @@ export default function SetupPage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4 w-full">
-                  <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10 mb-2 px-4 py-1">Sessão Ausente</Badge>
+                  <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10 mb-2 px-4 py-1">{t('setup.step4.absent')}</Badge>
                   <Button size="lg" className="w-full max-w-sm h-14 font-bold shadow-xl shadow-primary/20" onClick={manualLogin}>
                     <KeyRound className="w-5 h-5 mr-2" /> {t('setup.step4.loginBtn')}
                   </Button>
@@ -341,12 +341,12 @@ export default function SetupPage() {
                     disabled={loading} 
                     className="h-12 px-6"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.save')}
                   </Button>
                 </div>
                 {success === true && (
                   <p className="text-emerald-500 text-sm font-medium flex items-center gap-2 mt-2 animate-in fade-in duration-300">
-                    <CheckCircle2 className="w-4 h-4" /> Caminho validado com sucesso!
+                    <CheckCircle2 className="w-4 h-4" /> {t('setup.step5.success')}
                   </p>
                 )}
               </div>
@@ -360,13 +360,13 @@ export default function SetupPage() {
                  <PlayCircle className="w-16 h-16 text-primary" />
                </div>
                <div className="space-y-4">
-                 <h3 className="text-2xl font-bold">Tudo Pronto!</h3>
+                 <h3 className="text-2xl font-bold">{t('setup.step6.ready')}</h3>
                  <p className="text-muted-foreground">{t('setup.step6.description')}</p>
                </div>
                
                <div className="flex gap-4 w-full justify-center">
                  <Button variant="outline" size="lg" className="h-14 px-8 font-bold text-muted-foreground hover:text-foreground hover:bg-muted" onClick={handleFinish}>
-                   Deixar para depois
+                   {t('setup.step6.later')}
                  </Button>
                  <Button size="lg" className="h-14 px-8 font-bold shadow-xl shadow-primary/20" onClick={startScraper} disabled={loading}>
                    {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Activity className="w-5 h-5 mr-2" />}

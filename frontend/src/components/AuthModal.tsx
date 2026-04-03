@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, KeyRound, ExternalLink, AlertCircle } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +32,7 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
     mutationFn: (data: any) => api.post('/auth/login', data),
     onSuccess: (res) => {
       if (res.data.success) {
-        toast.success('Autenticado com sucesso!');
+        toast.success(t('auth.success'));
         onOpenChange(false);
         queryClient.invalidateQueries({ queryKey: ['sessionValid'] });
         setCaptchaInfo(null);
@@ -40,17 +42,17 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
         setCaptchaInfo(res.data);
         setCaptchaCode('');
         setErrorVisible(null);
-        toast.info('Captcha necessário para login ou senha incorreta');
+        toast.info(t('auth.captchaNeeded'));
       } else if (res.data.error) {
         setErrorVisible(res.data.error);
         if (captchaInfo) {
-           setErrorVisible("O captcha pode estar incorreto. Tente novamente.");
+           setErrorVisible(t('auth.captchaPossibleError'));
         }
         toast.error(res.data.error);
       }
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.error || 'Erro ao tentar autenticar';
+      const msg = err.response?.data?.error || t('auth.errorAuth');
       setErrorVisible(msg);
       toast.error(msg);
     }
@@ -60,15 +62,15 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
     mutationFn: () => api.get('/session/validate'),
     onSuccess: (res) => {
       if (res.data.success) {
-        toast.success('Autenticado com sucesso via navegador!');
+        toast.success(t('auth.successManual'));
         onOpenChange(false);
         queryClient.invalidateQueries({ queryKey: ['sessionValid'] });
       } else {
-        toast.error(res.data.message || 'Falha na autenticação manual');
+        toast.error(res.data.message || t('auth.failManual'));
       }
     },
     onError: () => {
-      toast.error('Erro ao abrir o navegador de autenticação');
+      toast.error(t('auth.errorBrowser'));
     }
   });
 
@@ -92,17 +94,17 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
       <DialogContent className="sm:max-w-md border-border bg-card">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-            <KeyRound className="h-5 w-5 text-primary" /> Autenticação RuTracker
+            <KeyRound className="h-5 w-5 text-primary" /> {t('auth.title')}
           </DialogTitle>
           <DialogDescription>
-            Insira suas credenciais para login no fórum. A autenticação será processada de forma segura em segundo plano.
+            {t('auth.description')}
           </DialogDescription>
         </DialogHeader>
 
         {errorVisible && (
           <Alert variant="destructive" className="animate-in fade-in zoom-in-95 duration-200 bg-destructive/10 border-destructive/20 text-destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle className="font-bold">Erro na Autenticação</AlertTitle>
+            <AlertTitle className="font-bold">{t('auth.errorTitle')}</AlertTitle>
             <AlertDescription className="text-xs opacity-90">
               {errorVisible}
             </AlertDescription>
@@ -111,19 +113,19 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
 
         <form onSubmit={handleLogin} className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="username">Usuário</Label>
+            <Label htmlFor="username">{t('auth.username')}</Label>
             <Input 
               id="username" 
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
-              placeholder="Ex: seu_usuario"
+              placeholder={t('auth.usernamePlaceholder')}
               required
               disabled={loginMutation.isPending}
               className="bg-background border-border"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <Label htmlFor="password">{t('auth.password')}</Label>
             <Input 
               id="password" 
               type="password" 
@@ -138,7 +140,7 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
 
           {captchaInfo && (
             <div className="space-y-3 p-4 bg-muted/50 rounded-lg border border-border animate-in fade-in slide-in-from-top-2">
-              <Label className="text-primary font-semibold">Responda ao Captcha</Label>
+              <Label className="text-primary font-semibold">{t('auth.captchaTitle')}</Label>
               <div className="flex flex-col items-center gap-2 bg-white p-3 rounded-md border border-border shadow-sm">
                 <img 
                   src={captchaInfo.captchaUrl} 
@@ -150,7 +152,7 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
               <Input 
                 value={captchaCode} 
                 onChange={(e) => setCaptchaCode(e.target.value)} 
-                placeholder="Insira o código acima"
+                placeholder={t('auth.captchaPlaceholder')}
                 required
                 disabled={loginMutation.isPending}
                 className="bg-background border-primary/20 ring-1 ring-primary/10"
@@ -164,10 +166,10 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
               {loginMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  {captchaInfo ? 'Validando Captcha...' : 'Autenticando...'}
+                  {captchaInfo ? t('auth.validatingCaptcha') : t('auth.authenticating')}
                 </>
               ) : (
-                captchaInfo ? 'Confirmar Captcha' : 'Autenticação em Segundo Plano'
+                captchaInfo ? t('auth.confirmCaptcha') : t('auth.backgroundAuth')
               )}
             </Button>
 
@@ -179,9 +181,9 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
               disabled={loginMutation.isPending || manualLoginMutation.isPending}
             >
               {manualLoginMutation.isPending ? (
-                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Aguardando Login...</>
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> {t('auth.waitingLogin')}</>
               ) : (
-                <>Abrir Navegador (Login Manual)</>
+                <>{t('auth.manualLogin')}</>
               )}
             </Button>
             
@@ -193,7 +195,7 @@ export default function AuthModal({ open, onOpenChange }: { open: boolean, onOpe
                 className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
                 onClick={() => window.open('https://rutracker.me/forum/profile.php?mode=register', '_blank')}
               >
-                Ainda não tem conta? <span className="underline font-medium">Registrar agora</span>
+                {t('auth.noAccount')} <span className="underline font-medium">{t('auth.registerNow')}</span>
                 <ExternalLink className="h-3 w-3" />
               </Button>
             </div>

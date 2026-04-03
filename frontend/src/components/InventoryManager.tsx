@@ -95,7 +95,7 @@ export default function InventoryManager() {
                   <TableHead className="font-bold">{t('settings.inventory.folder')}</TableHead>
                   <TableHead className="font-bold hidden md:table-cell">{t('settings.inventory.status')}</TableHead>
                   <TableHead className="font-bold">{t('settings.inventory.progress')}</TableHead>
-                  <TableHead className="font-bold text-right">Ações</TableHead>
+                  <TableHead className="font-bold text-right">{t('common.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -106,7 +106,7 @@ export default function InventoryManager() {
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${item.status === 'concluido' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
-                        {item.status}
+                        {t(`settings.inventory.statusMap.${item.status}`) || item.status}
                       </span>
                     </TableCell>
                     <TableCell className="font-mono text-xs">{item.progress}%</TableCell>
@@ -158,9 +158,9 @@ export default function InventoryManager() {
                     value={editForm.status || ''}
                     onChange={(e) => setEditForm({...editForm, status: e.target.value})}
                   >
-                    <option value="concluido">concluido</option>
-                    <option value="download">download</option>
-                    <option value="predownload">predownload</option>
+                    <option value="concluido">{t('settings.inventory.statusMap.concluido')}</option>
+                    <option value="download">{t('settings.inventory.statusMap.download')}</option>
+                    <option value="predownload">{t('settings.inventory.statusMap.predownload')}</option>
                   </select>
                 </div>
               </div>

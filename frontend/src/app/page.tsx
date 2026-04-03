@@ -230,33 +230,28 @@ export default function Home() {
     }
   }, [updateInfo]);
 
-  const selectAllMutation = useMutation({
-    mutationFn: async () => {
-      const res = await api.get('/all-game-ids', {
-        params: { 
-          q: search, 
-          type: typeFilter, 
-          path: downloadPath,
-          sort,
-          genre: genreFilter,
-          developer: devFilter
-        }
-      });
-      return res.data;
-    },
-    onSuccess: (ids) => {
-      setSelectedIds(ids);
-      toast.success(t('home.bulk.selected', { count: ids.length }));
-    },
-    onError: (err: any) => toast.error(t('common.error') + ': ' + err.message)
-  });
-
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
       const matchSearch = game.title.toLowerCase().includes(search.toLowerCase());
       return matchSearch;
     });
   }, [games, search]);
+
+  const allInPageSelected = filteredGames.length > 0 && filteredGames.every(g => selectedIds.includes(g.id));
+
+  const selectAll = () => {
+    if (allInPageSelected) {
+      const currentIds = filteredGames.map(g => g.id);
+      const nextSelection = selectedIds.filter(id => !currentIds.includes(id));
+      setSelectedIds(nextSelection);
+    } else {
+      const currentIds = filteredGames.map(g => g.id);
+      const uniqueNew = currentIds.filter(id => !selectedIds.includes(id));
+      const nextSelection = [...selectedIds, ...uniqueNew];
+      setSelectedIds(nextSelection);
+      toast.success(t('home.bulk.selected', { count: nextSelection.length }));
+    }
+  };
 
   const cleanTitle = (game: Game) => {
     const targetTitle = (translateMode && game.translated_title) ? game.translated_title : game.title;
@@ -509,17 +504,10 @@ export default function Home() {
                 variant="outline"
                 size="sm"
                 className="gap-2 border-primary/20 hover:bg-primary/10 animate-in fade-in slide-in-from-left-2 duration-300"
-                onClick={() => {
-                  if (selectedIds.length > 0) {
-                    setSelectedIds([]);
-                  } else {
-                    selectAllMutation.mutate();
-                  }
-                }}
-                disabled={selectAllMutation.isPending}
+                onClick={() => selectAll()}
               >
-                {selectAllMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                <span>{selectedIds.length > 0 ? t('home.bulk.deselectAll') : t('home.bulk.selectAll')}</span>
+                <Zap className="h-4 w-4" />
+                <span>{allInPageSelected ? t('home.bulk.deselectAll') : t('home.bulk.selectAll')}</span>
               </Button>
             )}
 

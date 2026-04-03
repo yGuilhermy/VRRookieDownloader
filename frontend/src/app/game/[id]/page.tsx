@@ -139,7 +139,7 @@ export default function GamePage() {
   const qbitMutation = useMutation({
     mutationFn: () => api.post('/torrent/download', { magnet: game?.magnet, gameId: game?.id }),
     onSuccess: () => {
-      toast.success(`${t('common.status')}: Download iniciado!`);
+      toast.success(`${t('common.started')}: ${t('game.actions.downloadStarted')}`);
       // Força refetch imediato para pegar o estado predownload
       queryClient.invalidateQueries({ queryKey: ['torrents'] });
     },

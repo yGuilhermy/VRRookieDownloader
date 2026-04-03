@@ -96,9 +96,9 @@ export default function Settings() {
     mutationFn: (data: { downloadPath?: string, translationLanguage?: string, interfaceLanguage?: string, offlineMode?: boolean }) => api.post('/settings', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
-      toast.success('Configurações sincronizadas!');
+      toast.success(t('settings.syncSuccess'));
     },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Erro ao sincronizar'),
+    onError: (err: any) => toast.error(err.response?.data?.error || t('settings.syncError')),
   });
 
   const handleSavePath = () => {
@@ -308,7 +308,7 @@ export default function Settings() {
           <CardFooter className="border-t border-border/50 pt-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
             <div className="flex items-center gap-2">
                <Zap className="h-4 w-4 text-primary" />
-               <span className="text-sm font-medium">Software: v0.1.5</span>
+               <span className="text-sm font-medium">Software: v0.1.6</span>
             </div>
             <Button 
               variant="outline" 
@@ -318,7 +318,7 @@ export default function Settings() {
               className="gap-2 border-primary/20 hover:border-primary/50"
             >
               {updateCheck.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
-              Checar Atualizações
+              {t('settings.checkUpdates')}
             </Button>
           </CardFooter>
         </Card>

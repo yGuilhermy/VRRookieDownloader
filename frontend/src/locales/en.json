@@ -16,11 +16,16 @@
     "stopped": "Stopped",
     "start": "Start",
     "stop": "Stop",
-    "status": "Status"
+    "status": "Status",
+    "actions": "Actions",
+    "retry": "Try Again",
+    "app": "App",
+    "started": "Started"
   },
   "settings": {
     "title": "Settings",
-    "description": "Manage scraping, forum session, and preferences.",
+    "syncSuccess": "Settings synchronized!",
+    "checkUpdates": "Check for Updates",
     "forumSession": {
       "title": "Forum Session",
       "description": "Source forum access. Required to index and search non-public information.",
@@ -82,7 +87,14 @@
       "confirmDelete": "Are you sure you want to remove this entry? The physical file will remain on disk.",
       "noItems": "No indexed items found.",
       "updateSuccess": "Index updated successfully!",
-      "removeSuccess": "Removed from index."
+      "removeSuccess": "Removed from index.",
+      "statusMap": {
+        "concluido": "Completed",
+        "download": "Downloading",
+        "predownload": "Predownload",
+        "unindexed": "Unindexed",
+        "unknown": "Unknown"
+      }
     }
   },
   "home": {
@@ -211,15 +223,48 @@
       "customCommand": "Running command {{current}}/{{total}}: {{cmd}}",
       "pushingCompanion": "Pushing companion OBB: {{pkg}}",
       "pushingLoneObb": "Pushing lone OBB: {{pkg}}",
-      "remainingCounter": "{{time}} remaining"
+      "remainingCounter": "{{time}} remaining",
+      "finishedTitle": "Installation Completed!",
+      "failTitle": "Installation Failed",
+      "successDesc": "The game \"{{name}}\" was successfully installed on your VR device. You can now disconnect the cable if you wish.",
+      "failDesc": "An error occurred while trying to install \"{{name}}\". Check the USB connection and available space on the device.",
+      "understood": "Understood",
+      "scanMatches": "Status: Found matches for {{count}} items."
     },
     "apps": {
       "title": "Apps on Device",
       "packagesDetected": "packages detected",
       "selectDevice": "Select a device to see installed apps.",
       "noApps": "No third-party packages found.",
-      "confirmUninstall": "Do you really want to uninstall {}?"
+      "confirmUninstall": "Do you really want to uninstall {}?",
+      "uninstalled": "App uninstalled successfully!",
+      "failUninstall": "Failed to uninstall."
     }
+  },
+  "auth": {
+    "title": "RuTracker Authentication",
+    "description": "Enter your credentials to log in to the forum. Authentication will be processed securely in the background.",
+    "errorTitle": "Authentication Error",
+    "username": "Username",
+    "usernamePlaceholder": "e.g., your_user",
+    "password": "Password",
+    "captchaTitle": "Enter Captcha",
+    "captchaPlaceholder": "Enter the code above",
+    "validatingCaptcha": "Validating Captcha...",
+    "authenticating": "Authenticating...",
+    "confirmCaptcha": "Confirm Captcha",
+    "backgroundAuth": "Background Authentication",
+    "waitingLogin": "Waiting for Login...",
+    "manualLogin": "Open Browser (Manual Login)",
+    "noAccount": "Don't have an account?",
+    "registerNow": "Register now",
+    "success": "Authenticated successfully!",
+    "captchaNeeded": "Captcha needed or incorrect password",
+    "captchaPossibleError": "The captcha might be incorrect. Try again.",
+    "errorAuth": "Error trying to authenticate",
+    "successManual": "Authenticated successfully via browser!",
+    "failManual": "Manual authentication failed",
+    "errorBrowser": "Error opening authentication browser"
   },
   "game": {
     "back": "Back",
@@ -240,7 +285,8 @@
       "remove": "Remove from List",
       "deleteFiles": "Delete Files",
       "deleteConfirm": "This will permanently delete the files from the server. Are you sure?",
-      "viewPost": "View Original Post"
+      "viewPost": "View Original Post",
+      "downloadStarted": "Download started!"
     },
     "stats": {
       "seeds": "Seeds",
@@ -304,7 +350,7 @@
       "importing": "Analyzing...",
       "clear": "Clear Database",
       "confirmClear": "Confirm clear {{count}}/5",
-      "clearWarning": "Warning: Are you sure? Faltam {{remaining}} confirmações para perder todos os dados."
+      "clearWarning": "Warning: Are you sure? {{remaining}} remaining confirmations before losing all data."
     },
     "failed": {
       "title": "Scraping Failures",
@@ -349,7 +395,11 @@
       "button": "Rebuild Translation",
       "confirm": "This will re-scrape ALL games in the database to update translations to {{lang}}. This may take a long time and depends on your internet/session. Continue?",
       "success": "Full rebuild started in background."
-    }
+    },
+    "backupApplied": "Backup applied successfully!",
+    "reloading": "Reloading in 1.5s...",
+    "hoverToReveal": "Hover to reveal",
+    "deleteSuccess": "Game deleted successfully!"
   },
   "footer": {
     "description": "Automated system to catalog, download and locally install VR content.",
@@ -357,7 +407,7 @@
     "info": "Information",
     "legal": "Legal Disclaimer",
     "poweredBy": "Powered by ADB",
-    "beta": "Beta 0.1.5",
+    "beta": "Beta 0.1.6",
     "copyright": "All rights reserved",
     "madeWith": "Made with",
     "forEnthusiasts": "for Virtual Reality enthusiasts"
@@ -389,21 +439,33 @@
       "failNotRunning": "qBittorrent doesn't seem to be running. Open it and try again.",
       "failRunningNoWebUI": "Warning: qBittorrent is running but WebUI is off. To fix:\n1. Open Tools > Options > Web UI.\n2. Enable Web UI.\n3. Set IP to 127.0.0.1 and Port to 8080.\n4. Keep Username and Password as admin/adminadmin."
     },
-    "step4": {
-      "title": "RuTracker Session",
-      "description": "The games source. Authenticate to enable downloads.",
-      "loginBtn": "Open Manual Login",
-      "success": "Active Session"
+    "step6": {
+      "title": "Indexer",
+      "description": "Start scraping the games library from the forum. You can do this later.",
+      "startScraper": "Start Indexer",
+      "ready": "All Ready!",
+      "later": "Leave it for later",
+      "started": "Scraper started!",
+      "errorFinalize": "Error finishing: "
     },
     "step5": {
       "title": "Games Folder",
       "description": "Where your games will be saved and extracted.",
-      "path": "Folder Path"
+      "path": "Folder Path",
+      "success": "Path successfully validated!",
+      "error": "Error saving path: "
     },
-    "step6": {
-      "title": "Indexer",
-      "description": "Start scraping the games library from the forum. You can do this later.",
-      "startScraper": "Start Indexer"
+    "step4": {
+      "title": "RuTracker Session",
+      "description": "The games source. Authenticate to enable downloads.",
+      "loginBtn": "Open Manual Login",
+      "success": "Active Session",
+      "absent": "Session Absent",
+      "waiting": "Waiting for login in the browser...",
+      "info": "Browser opened. Log in to RuTracker...",
+      "loginSuccess": "Login successful!",
+      "loginFail": "Login failed or timeout.",
+      "connectError": "Error connecting."
     }
   }
 }

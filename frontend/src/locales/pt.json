@@ -16,11 +16,16 @@
     "stopped": "Parado",
     "start": "Iniciar",
     "stop": "Parar",
-    "status": "Status"
+    "status": "Status",
+    "actions": "Ações",
+    "retry": "Tentar Novamente",
+    "app": "Aplicativo",
+    "started": "Iniciado!"
   },
   "settings": {
     "title": "Configurações",
-    "description": "Gerencie o scraping, a sessão do fórum e preferências.",
+    "syncSuccess": "Configurações sincronizadas!",
+    "checkUpdates": "Checar Atualizações",
     "forumSession": {
       "title": "Sessão do Fórum",
       "description": "Acesso ao fórum fonte. Necessário para indexar e buscar informações não-públicas.",
@@ -82,7 +87,14 @@
       "confirmDelete": "Tem certeza que deseja remover esta entrada? O arquivo físico continuará no disco.",
       "noItems": "Nenhum item indexado.",
       "updateSuccess": "Índice atualizado com sucesso!",
-      "removeSuccess": "Removido do índice."
+      "removeSuccess": "Removido do índice.",
+      "statusMap": {
+        "concluido": "Concluído",
+        "download": "Baixando",
+        "predownload": "Pré-download",
+        "unindexed": "Não Indexado",
+        "unknown": "Desconhecido"
+      }
     }
   },
   "home": {
@@ -211,15 +223,48 @@
       "customCommand": "Executando comando {{current}}/{{total}}: {{cmd}}",
       "pushingCompanion": "Enviando OBB companheira: {{pkg}}",
       "pushingLoneObb": "Enviando OBB avulso: {{pkg}}",
-      "remainingCounter": "restam {{time}}"
+      "remainingCounter": "{{time}} restantes",
+      "finishedTitle": "Instalação Concluída!",
+      "failTitle": "Falha na Instalação",
+      "successDesc": "O jogo \"{{name}}\" foi instalado com sucesso no seu dispositivo VR. Você já pode desconectar o cabo se desejar.",
+      "failDesc": "Ocorreu um erro ao tentar instalar \"{{name}}\". Verifique a conexão USB e o espaço disponível no dispositivo.",
+      "understood": "Entendido",
+      "scanMatches": "Status: Encontradas correspondências para {{count}} itens."
     },
     "apps": {
       "title": "Apps no Dispositivo",
       "packagesDetected": "pacotes detectados",
       "selectDevice": "Selecione um dispositivo para ver os apps instalados.",
       "noApps": "Nenhum pacote de terceiro encontrado.",
-      "confirmUninstall": "Deseja realmente desinstalar {}?"
+      "confirmUninstall": "Tem certeza que deseja desinstalar {}?",
+      "uninstalled": "Aplicativo desinstalado com sucesso!",
+      "failUninstall": "Falha na desinstalação."
     }
+  },
+  "auth": {
+    "title": "Autenticação RuTracker",
+    "description": "Insira suas credenciais para login no fórum. A autenticação será processada de forma segura em segundo plano.",
+    "errorTitle": "Erro na Autenticação",
+    "username": "Usuário",
+    "usernamePlaceholder": "Ex: seu_usuario",
+    "password": "Senha",
+    "captchaTitle": "Responda ao Captcha",
+    "captchaPlaceholder": "Insira o código acima",
+    "validatingCaptcha": "Validando Captcha...",
+    "authenticating": "Autenticando...",
+    "confirmCaptcha": "Confirmar Captcha",
+    "backgroundAuth": "Autenticação em Segundo Plano",
+    "waitingLogin": "Aguardando Login...",
+    "manualLogin": "Abrir Navegador (Login Manual)",
+    "noAccount": "Ainda não tem conta?",
+    "registerNow": "Registrar agora",
+    "success": "Autenticado com sucesso!",
+    "captchaNeeded": "Captcha necessário para login ou senha incorreta",
+    "captchaPossibleError": "O captcha pode estar incorreto. Tente novamente.",
+    "errorAuth": "Erro ao tentar autenticar",
+    "successManual": "Autenticado com sucesso via navegador!",
+    "failManual": "Falha na autenticação manual",
+    "errorBrowser": "Erro ao abrir o navegador de autenticação"
   },
   "game": {
     "back": "Voltar",
@@ -240,7 +285,8 @@
       "remove": "Remover da Lista",
       "deleteFiles": "Apagar Arquivos",
       "deleteConfirm": "Isso vai apagar permanentemente os arquivos do servidor. Tem certeza?",
-      "viewPost": "Ver Post Original"
+      "viewPost": "Ver Post Original",
+      "downloadStarted": "Download iniciado!"
     },
     "stats": {
       "seeds": "Sementes (Seeds)",
@@ -347,9 +393,13 @@
     },
     "rebuildAll": {
       "button": "Reconstruir Tradução",
-      "confirm": "Isso vai re-scrapear TODOS os jogos no banco para atualizar as traduções para {{lang}}. Pode demorar e depende da internet/sessão. Continuar?",
-      "success": "Reconstrução total iniciada em segundo plano."
-    }
+      "confirm": "Isso vai re-escanear TODOS os jogos do banco para atualizar a tradução para {{lang}}. Isso pode demorar e depende da conexão/sessão. Continuar?",
+      "success": "Rebuild total iniciado em segundo plano."
+    },
+    "backupApplied": "Backup aplicado com sucesso!",
+    "reloading": "Recarregando em 1.5s...",
+    "hoverToReveal": "Passe o mouse para revelar",
+    "deleteSuccess": "Jogo deletado com sucesso!"
   },
   "footer": {
     "description": "Sistema automatizado para catalogar, baixar e instalar localmente conteúdo VR.",
@@ -357,7 +407,7 @@
     "info": "Informações",
     "legal": "Aviso Legal",
     "poweredBy": "Powered by ADB",
-    "beta": "Beta 0.1.5!",
+    "beta": "Beta 0.1.6!",
     "copyright": "Todos os direitos reservados",
     "madeWith": "Feito com",
     "forEnthusiasts": "para entusiastas de Realidade Virtual"
@@ -389,21 +439,33 @@
       "failNotRunning": "O programa qBittorrent não parece estar aberto no sistema. Abra-o e tente novamente.",
       "failRunningNoWebUI": "Atenção: O qBittorrent está rodando, mas a WebUI está desligada. Para corrigir:\n1. Vá em Ferramentas > Opções > Web UI.\n2. Habilite a Interface.\n3. Defina IP para 127.0.0.1 e Porta para 8080.\n4. Se possível, mantenha Usuário e Senha como admin/adminadmin."
     },
-    "step4": {
-      "title": "Sessão RuTracker",
-      "description": "A fonte dos jogos. Autentique para liberar os downloads.",
-      "loginBtn": "Abrir Login Manual",
-      "success": "Sessão Ativa"
+    "step6": {
+      "title": "Indexador",
+      "description": "Começar a baixar a lista de jogos do fórum (Scraping). Você pode fazer isso depois.",
+      "startScraper": "Iniciar Indexador",
+      "ready": "Tudo Pronto!",
+      "later": "Deixar para depois",
+      "started": "Scraper iniciado!",
+      "errorFinalize": "Erro ao finalizar: "
     },
     "step5": {
       "title": "Pasta de Jogos",
       "description": "Onde os jogos serão salvos e extraídos.",
-      "path": "Caminho da Pasta"
+      "path": "Caminho da Pasta",
+      "success": "Caminho validado com sucesso!",
+      "error": "Erro ao salvar caminho: "
     },
-    "step6": {
-      "title": "Indexador",
-      "description": "Começar a baixar a lista de jogos do fórum (Scraping). Você pode fazer isso depois.",
-      "startScraper": "Iniciar Indexador"
+    "step4": {
+      "title": "Sessão RuTracker",
+      "description": "A fonte dos jogos. Autentique para liberar os downloads.",
+      "loginBtn": "Abrir Login Manual",
+      "success": "Sessão Ativa",
+      "absent": "Sessão Ausente",
+      "waiting": "Aguardando login no navegador...",
+      "info": "Navegador aberto. Faça login no RuTracker...",
+      "loginSuccess": "Login bem-sucedido!",
+      "loginFail": "Falha no login ou timeout.",
+      "connectError": "Erro ao conectar."
     }
   }
 }

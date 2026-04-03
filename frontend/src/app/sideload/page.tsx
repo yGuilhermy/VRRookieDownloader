@@ -75,10 +75,10 @@ export default function SideloadPage() {
            toast.info(data.message);
         }
       } else if (data.type === 'finished') {
-        const itemName = data.folderPath ? data.folderPath.split(/[\\/]/).pop() : 'Jogo';
+        const itemName = data.folderPath ? data.folderPath.split(/[\\/]/).pop() : t('common.app');
         setInstallingFolder(null);
         setInstallProgress(null);
-        setFinishedItem({ name: itemName, success: data.success });
+        setFinishedItem({ name: itemName || t('common.app'), success: data.success });
         
         if (data.success) {
           toast.success(t('sideload.install.installed'));
@@ -162,11 +162,11 @@ export default function SideloadPage() {
       return res.data;
     },
     onSuccess: () => {
-      toast.success(t('sideload.apps.noApps').replace('No third-party packages found.', 'Aplicativo desinstalado com sucesso!')); // Fallback logic or update key
+      toast.success(t('sideload.apps.uninstalled')); 
       queryClient.invalidateQueries({ queryKey: ['adb-apps', selectedDevice] });
     },
     onError: (error: any) => {
-      toast.error(t('common.error') + ': ' + (error.response?.data?.error || error.message));
+      toast.error(t('common.error') + ': ' + (error.response?.data?.error || t('sideload.apps.failUninstall')));
     }
   });
 
@@ -204,7 +204,7 @@ const scanMutation = useMutation({
       return res.data;
     },
     onSuccess: (data) => {
-      toast.success(`${t('common.status')}: Encontradas correspondências para ${data.matchedCount} itens.`);
+      toast.success(t('sideload.install.scanMatches', { count: data.matchedCount }));
       queryClient.invalidateQueries({ queryKey: ['local-folders'] });
       queryClient.invalidateQueries({ queryKey: ['games'] });
     },
@@ -244,7 +244,7 @@ const scanMutation = useMutation({
                 <div className="space-y-1 overflow-hidden">
                   <span className="text-xs font-bold text-indigo-400 flex items-center gap-2 uppercase tracking-wider">
                      <PackageSearch className="h-3.5 w-3.5" />
-                     {installProgress.message || 'Instalando...'}
+                     {installProgress.message || t('sideload.install.installing')}
                   </span>
                   <p className="text-[11px] text-muted-foreground font-mono truncate" title={installProgress.name || installingFolder || ''}>
                     {installProgress.name || installingFolder}
@@ -284,26 +284,26 @@ const scanMutation = useMutation({
               {finishedItem?.success ? (
                 <>
                   <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-                  Instalação Concluída!
+                  {t('sideload.install.finishedTitle')}
                 </>
               ) : (
                 <>
                   <AlertCircle className="h-6 w-6 text-rose-500" />
-                  Falha na Instalação
+                  {t('sideload.install.failTitle')}
                 </>
               )}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {finishedItem ? (
                 finishedItem.success 
-                  ? `O jogo "${finishedItem.name}" foi instalado com sucesso no seu dispositivo VR. Você já pode desconectar o cabo se desejar.`
-                  : `Ocorreu um erro ao tentar instalar "${finishedItem.name}". Verifique a conexão USB e o espaço disponível no dispositivo.`
+                  ? t('sideload.install.successDesc', { name: finishedItem.name })
+                  : t('sideload.install.failDesc', { name: finishedItem.name })
               ) : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setFinishedItem(null)} className={finishedItem?.success ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}>
-              Entendido
+              {t('sideload.install.understood')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
