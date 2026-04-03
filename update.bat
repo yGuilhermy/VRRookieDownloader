@@ -5,12 +5,12 @@ echo ==========================================
 echo    VR Rookie Downloader - Updater
 echo ==========================================
 echo.
-echo [1] Verificar Atualizacao (Padrão)
-echo [2] Forcar Reinstalacao (Hard Update)
+echo [1] Verify Update (Default)
+echo [2] Force Reinstall (Hard Update)
 echo.
-set /p choice="Selecione uma opcao: "
+set /p choice="Select an option: "
 if not exist "package.json" (
-    echo [ERRO] package.json nao encontrado.
+    echo [ERROR] package.json not found.
     pause
     exit /b 1
 )
@@ -28,8 +28,8 @@ if "%choice%"=="2" (
     set "REMOTE_VERSION=HARD-UPDATE"
     goto :proceed_update
 )
-echo [INFO] Versao Local: !LOCAL_VERSION!
-echo [INFO] Checando GitHub...
+echo [INFO] Local Version: !LOCAL_VERSION!
+echo [INFO] Checking GitHub...
 curl -s -L "https://raw.githubusercontent.com/yGuilhermy/VRRookieDownloader/main/package.json?t=%random%" > remote_pkg.json
 set "REMOTE_VERSION="
 for /f "tokens=2 delims=:," %%a in ('findstr /i "\"version\"" remote_pkg.json') do (
@@ -42,20 +42,20 @@ for /f "tokens=2 delims=:," %%a in ('findstr /i "\"version\"" remote_pkg.json') 
 )
 :r1
 del remote_pkg.json
-echo [INFO] Versao GitHub: !REMOTE_VERSION!
+echo [INFO] GitHub Version: !REMOTE_VERSION!
 if "!LOCAL_VERSION!"=="!REMOTE_VERSION!" (
-    echo [INFO] O aplicativo ja esta atualizado.
+    echo [INFO] The application is already up to date.
     pause
     exit /b 0
 )
 powershell -Command "$v1 = [version]'!LOCAL_VERSION!'; $v2 = [version]'!REMOTE_VERSION!'; if ($v2 -gt $v1) { exit 1 } else { exit 0 }"
 if %errorlevel% neq 1 (
-    echo [INFO] Versao local e igual ou superior a do GitHub.
+    echo [INFO] Local version is equal to or higher than GitHub version.
     pause
     exit /b 0
 )
 :proceed_update
-echo [INFO] Iniciando processo de atualizacao...
+echo [INFO] Starting update process...
 taskkill /F /IM node.exe >nul 2>nul
 taskkill /F /IM next.exe >nul 2>nul
 timeout /t 2 /nobreak >nul
@@ -63,7 +63,7 @@ for /f "delims=" %%a in ('wmic OS Get localdatetime ^| find "."') do set dt=%%a
 set "date_str=!dt:~0,14!"
 set "BACKUP_DIR=old_!LOCAL_VERSION!_!date_str!"
 mkdir "!BACKUP_DIR!"
-echo [INFO] Criando backup em !BACKUP_DIR!...
+echo [INFO] Creating backup in !BACKUP_DIR!...
 for /d %%d in (*) do (
     set "name=%%d"
     if /i not "!name!"=="node_modules" if /i not "!name!"==".git" if /i not "!name!"=="!BACKUP_DIR!" if "!name:~0,4!" neq "old_" (
@@ -83,22 +83,22 @@ if exist "!BACKUP_DIR!\frontend\node_modules" (
     if not exist frontend mkdir frontend
     move "!BACKUP_DIR!\frontend\node_modules" "frontend\" >nul
 )
-echo [INFO] Baixando arquivos recentes...
+echo [INFO] Downloading recent files...
 curl -L "https://github.com/yGuilhermy/VRRookieDownloader/archive/refs/heads/main.zip" -o update.zip
 if errorlevel 1 (
-    echo [ERRO] Falha no download.
+    echo [ERROR] Download failed.
     pause
     exit /b 1
 )
-echo [INFO] Extraindo arquivos...
+echo [INFO] Extracting files...
 powershell -Command "Expand-Archive -Path 'update.zip' -DestinationPath 'temp_extract' -Force"
 del update.zip
-echo [INFO] Aplicando novos arquivos...
+echo [INFO] Applying new files...
 for /d %%d in (temp_extract\*) do (
     xcopy "%%d\*" . /E /Y /H /Q >nul
 )
 rmdir /s /q temp_extract
-echo [INFO] Finalizando...
+echo [INFO] Finishing...
 call setup.bat
-echo [OK] Processo concluido! !REMOTE_VERSION!
+echo [OK] Process completed! !REMOTE_VERSION!
 pause

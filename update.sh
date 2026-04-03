@@ -4,32 +4,32 @@ echo "=========================================="
 echo "   VR Rookie Downloader - Updater"
 echo "=========================================="
 echo
-echo "[1] Verificar Atualizacao (Padrao)"
-echo "[2] Forcar Reinstalacao (Hard Update)"
+echo "[1] Verify Update (Default)"
+echo "[2] Force Reinstall (Hard Update)"
 echo
-read -p "Selecione uma opcao: " choice
+read -p "Select an option: " choice
 if [ ! -f "package.json" ]; then
-    echo "[ERRO] package.json nao encontrado."
+    echo "[ERROR] package.json not found."
     exit 1
 fi
 LOCAL_VERSION=$(grep '"version"' package.json | head -n 1 | awk -F '"' '{print $4}')
 if [ "$choice" == "2" ]; then
     REMOTE_VERSION="HARD-UPDATE"
 else
-    echo "[INFO] Versao Local: $LOCAL_VERSION"
-    echo "[INFO] Checando GitHub..."
+    echo "[INFO] Local Version: $LOCAL_VERSION"
+    echo "[INFO] Checking GitHub..."
     REMOTE_VERSION=$(curl -s "https://raw.githubusercontent.com/yGuilhermy/VRRookieDownloader/main/package.json?t=$(date +%s)" | grep '"version"' | head -n 1 | awk -F '"' '{print $4}')
-    echo "[INFO] Versao GitHub: $REMOTE_VERSION"
+    echo "[INFO] GitHub Version: $REMOTE_VERSION"
     if [ "$LOCAL_VERSION" == "$REMOTE_VERSION" ]; then
-        echo "[INFO] O aplicativo ja esta atualizado."
+        echo "[INFO] The application is already up to date."
         exit 0
     fi
     if [ "$(printf '%s\n' "$LOCAL_VERSION" "$REMOTE_VERSION" | sort -V | head -n1)" == "$REMOTE_VERSION" ]; then
-        echo "[INFO] Versao local e atual ou superior a do GitHub."
+        echo "[INFO] Local version is equal to or higher than GitHub version."
         exit 0
     fi
 fi
-echo "[INFO] Iniciando processo..."
+echo "[INFO] Starting update process..."
 pkill -f "node " || true
 pkill -f "next-server" || true
 sleep 1
@@ -42,14 +42,14 @@ for item in * .*; do
 done
 [ -d "$BACKUP_DIR/backend/node_modules" ] && mkdir -p backend && mv "$BACKUP_DIR/backend/node_modules" backend/
 [ -d "$BACKUP_DIR/frontend/node_modules" ] && mkdir -p frontend && mv "$BACKUP_DIR/frontend/node_modules" frontend/
-echo "[INFO] Baixando arquivos..."
+echo "[INFO] Downloading recent files..."
 curl -L "https://github.com/yGuilhermy/VRRookieDownloader/archive/refs/heads/main.zip" -o update.zip
-echo "[INFO] Extraindo..."
+echo "[INFO] Extracting files..."
 unzip -q update.zip
 rm update.zip
-echo "[INFO] Aplicando..."
+echo "[INFO] Applying new files..."
 cp -af VRRookieDownloader-main/* . || cp -af VRRookieDownloader-master/* .
 rm -rf VRRookieDownloader-main VRRookieDownloader-master
 chmod +x setup.sh start.sh update.sh
 ./setup.sh
-echo "[OK] Processo concluido! $REMOTE_VERSION"
+echo "[OK] Process completed! $REMOTE_VERSION"
