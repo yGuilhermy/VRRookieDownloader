@@ -59,6 +59,7 @@ O **VR Rookie Downloader** é uma ferramenta de indexação técnica. É imperat
 - Controle remoto de downloads.
 - Monitoramento de progresso em tempo real diretamente na biblioteca.
 - **Sistema de Bulk Download:** Selecione múltiplos jogos no catálogo e inicie todos os downloads simultaneamente para o qBitTorrent com um único clique.
+- **Gerenciador de Índice:** Controle avançado do arquivo `.index.json`, permitindo edição ou remoção manual de entradas para resolver inconsistências na biblioteca.
 - Sincronização automática entre arquivos físicos no HD e o banco de dados.
 
 ### Sideloading

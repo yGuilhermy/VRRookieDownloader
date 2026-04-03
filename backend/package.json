@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
@@ -31,6 +31,7 @@
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1",
     "vrrookie-downloader": "file:..",
+    "vrrookiedownloader": "file:..",
     "webtorrent": "^1.9.7"
   },
   "devDependencies": {
