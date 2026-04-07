@@ -48,6 +48,7 @@
 **Keeping your app updated and your library synced**
 
 - **Auto-Update System:** The app checks for new versions on GitHub every time it starts and performs a secure backup before updating.
+- **Seamless Setup:** The application automatically opens http://vrsideforge.local in your default browser on startup.
 - **Multi-language System:** Interface available in **English (default)** and **Portuguese**, with dynamic switching in settings.
 - **Flexible Translation:** Choose the destination language for game translations (English or Portuguese).
 - **Optimized Interface:** Toggle button to hide/show the filter sidebar to focus on game viewing.
@@ -134,7 +135,7 @@ chmod +x update.sh
 - **Option 1 (Normal):** Checks the version and only updates if a newer one exists on GitHub.
 - **Option 2 (Hard Update):** Forces a full reinstall, downloading the latest source independently of the current version.
 
-Wait for the loading to finish and access http://localhost:3000 or http://vrsideforge.local to use the app via browser.
+Wait for the loading to finish and access http://localhost or http://vrsideforge.local to use the app via browser.
 
 ### qBitTorrent Configuration
 

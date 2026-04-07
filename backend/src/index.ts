@@ -1434,6 +1434,31 @@ async function bootstrap() {
   await initDb();
   httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`Backend is running on http://0.0.0.0:${PORT}`);
+    
+    // Auto-open browser on startup with a guard to avoid opening on every dev reload
+    const lastOpenPath = path.join(USER_DATA_DIR, '.last_open');
+    let shouldOpen = true;
+    try {
+      if (fs.existsSync(lastOpenPath)) {
+        const lastOpen = parseInt(fs.readFileSync(lastOpenPath, 'utf8'));
+        if (Date.now() - lastOpen < 15000) shouldOpen = false; // 15s guard
+      }
+    } catch { shouldOpen = true; }
+
+    if (shouldOpen) {
+      try {
+        fs.writeFileSync(lastOpenPath, Date.now().toString());
+        const url = 'http://vrsideforge.local/';
+        const start = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start ""' : 'xdg-open';
+        console.log(`[Browser] Automatically opening ${url}...`);
+        // Small delay to ensure frontend has a head start
+        setTimeout(() => {
+          exec(`${start} ${url}`);
+        }, 3000);
+      } catch (err) {
+        console.error('[Browser] Failed to write .last_open or open browser:', err);
+      }
+    }
   });
 }
 

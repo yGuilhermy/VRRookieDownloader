@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useStore } from '@/store/useStore';
 import pt from '@/locales/pt.json';
 import en from '@/locales/en.json';
@@ -10,7 +11,7 @@ const translations = {
 export function useTranslation() {
   const { interfaceLanguage } = useStore();
   
-  const t = (key: string, params?: Record<string, any>) => {
+  const t = useCallback((key: string, params?: Record<string, any>) => {
     const keys = key.split('.');
     let result: any = translations[interfaceLanguage];
     
@@ -41,7 +42,7 @@ export function useTranslation() {
     }
     
     return text;
-  };
+  }, [interfaceLanguage]);
 
   return { t, lang: interfaceLanguage };
 }

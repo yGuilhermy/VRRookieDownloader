@@ -95,6 +95,7 @@ export async function performSideForgeSideload(targetPath: string, deviceId?: st
     if (stat.isFile()) {
       if (absolutePath.endsWith('.apk')) {
         const pkg = await getApkPackageName(absolutePath) || path.basename(absolutePath, '.apk');
+        emitProgress(getMsg('installingApk', lang, { apk: path.basename(absolutePath) }), 10, path.basename(absolutePath), 1, 0);
         const res = await sideloadApkWithRetry(absolutePath, pkg, deviceId, lang, (m: string, p: number, s?: number, e?: number) => emitProgress(m, p, path.basename(absolutePath), 1, 0, s, e));
         installLog.push({ apk: path.basename(absolutePath), success: res.success, reinstalled: res.reinstalled });
         
