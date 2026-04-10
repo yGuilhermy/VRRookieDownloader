@@ -664,6 +664,9 @@ app.get('/api/games/:id', async (req, res) => {
       isDownloading = invItem.status === 'download' || invItem.status === 'predownload';
       torrentProgress = invItem.progress || 0;
       localPath = invItem.folderName || '';
+      const invHash = invItem.hash || '';
+      res.json({ ...game, isLocalDownload: isLocal, localPath, invHash, isDownloading, torrentProgress: parseFloat(torrentProgress.toFixed(1)) });
+      return;
     }
   }
 
@@ -1134,9 +1137,50 @@ app.post('/api/torrent/action', async (req, res) => {
       }
     });
 
+    if (action === 'delete' || action === 'delete_drive') {
+      const dir = globalDownloadPath || '';
+      if (dir && fs.existsSync(dir)) {
+        const inventory = getInventory(dir);
+        if (inventory.downloads && inventory.downloads[hash]) {
+          delete inventory.downloads[hash];
+          updateInventory(dir, inventory);
+          console.log(`[qBit] Removido do índice após ação ${action}: ${hash}`);
+        }
+      }
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao executar ação no qBit' });
+  }
+});
+
+app.post('/api/inventory/delete-game', async (req, res) => {
+  const { hash } = req.body;
+  const dir = globalDownloadPath || '';
+  if (!dir || !fs.existsSync(dir)) return res.status(400).json({ error: 'Diretório não configurado' });
+
+  try {
+    const inventory = getInventory(dir);
+    const item = inventory.downloads[hash];
+    
+    if (item) {
+      const folderName = item.folderName;
+      if (folderName) {
+        const fullPath = path.join(dir, folderName);
+        if (fs.existsSync(fullPath)) {
+          fs.rmSync(fullPath, { recursive: true, force: true });
+          console.log(`[Inventory] Ficheiros removidos para: ${folderName}`);
+        }
+      }
+      delete inventory.downloads[hash];
+      updateInventory(dir, inventory);
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ error: 'Jogo não encontrado no índice' });
+    }
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });
 

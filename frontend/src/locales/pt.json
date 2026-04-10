@@ -288,7 +288,9 @@
       "connectQuest": "Conecte o Quest via USB",
       "remove": "Remover da Lista",
       "deleteFiles": "Apagar Arquivos",
+      "removeGame": "Remover Jogo",
       "deleteConfirm": "Isso vai apagar permanentemente os arquivos do servidor. Tem certeza?",
+      "removeGameConfirm": "Isso removerá o jogo da sua biblioteca e apagará permanentemente os arquivos do servidor. Tem certeza?",
       "viewPost": "Ver Post Original",
       "downloadStarted": "Download iniciado!"
     },

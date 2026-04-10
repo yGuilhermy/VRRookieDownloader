@@ -34,6 +34,7 @@ interface GameDetail {
   localPath?: string;
   wishlist?: number;
   translated_title?: string;
+  invHash?: string;
 }
 
 export default function GamePage() {
@@ -177,6 +178,21 @@ export default function GamePage() {
     },
   });
 
+  const removeGameMutation = useMutation({
+    mutationFn: () => {
+      const active = torrents.find((t: any) => t.gameId === game?.id);
+      const hash = active?.hash || game?.invHash;
+      if (!hash) throw new Error('Identificador não encontrado');
+      return api.post('/inventory/delete-game', { hash });
+    },
+    onSuccess: () => {
+      toast.success(t('admin.deleteSuccess'));
+      queryClient.invalidateQueries({ queryKey: ['game', id] });
+      queryClient.invalidateQueries({ queryKey: ['torrents'] });
+    },
+    onError: (err: any) => toast.error(err.message || t('common.error')),
+  });
+
   const { data: devices = [] } = useQuery<string[]>({
     queryKey: ['adb-devices'],
     queryFn: async () => {
@@ -307,19 +323,35 @@ export default function GamePage() {
                     </Button>
 
                     {isDownloaded && game.localPath && (
-                      <Button 
-                        variant="default"
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 gap-2 animate-in slide-in-from-bottom-2 duration-500"
-                        onClick={() => installMutation.mutate(game.localPath!)}
-                        disabled={installMutation.isPending || devices.length === 0}
-                      >
-                        {installMutation.isPending ? (
-                          <RefreshCw className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Smartphone className="h-5 w-5" />
-                        )}
-                        {devices.length === 0 ? t('game.actions.connectQuest') : t('game.actions.installOnQuest')}
-                      </Button>
+                      <div className="flex flex-col gap-2">
+                        <Button 
+                          variant="default"
+                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 gap-2 animate-in slide-in-from-bottom-2 duration-500"
+                          onClick={() => installMutation.mutate(game.localPath!)}
+                          disabled={installMutation.isPending || devices.length === 0}
+                        >
+                          {installMutation.isPending ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Smartphone className="h-5 w-5" />
+                          )}
+                          {devices.length === 0 ? t('game.actions.connectQuest') : t('game.actions.installOnQuest')}
+                        </Button>
+
+                        <Button
+                          variant="destructive"
+                          className="w-full flex gap-2 h-10 border border-destructive/20 bg-destructive/10 hover:bg-destructive text-destructive hover:text-white transition-all"
+                          onClick={() => {
+                            if (confirm(t('game.actions.removeGameConfirm'))) {
+                              removeGameMutation.mutate();
+                            }
+                          }}
+                          disabled={removeGameMutation.isPending}
+                        >
+                          {removeGameMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                          {t('game.actions.removeGame')}
+                        </Button>
+                      </div>
                     )}
 
                     {!active && !isDownloaded && (

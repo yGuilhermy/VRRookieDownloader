@@ -48,7 +48,6 @@ O **VRSideForge** é uma ferramenta de indexação técnica. É imperativo compr
 **Mantendo seu app atualizado e sincronizado**
 
 - **Sistema de Auto-Update:** O app verifica novas versões no GitHub ao iniciar e realiza um backup de segurança antes de atualizar.
-- **Configuração Sem Emendas:** O aplicativo abre automaticamente o endereço http://vrsideforge.local no seu navegador padrão ao iniciar o servidor.
 - **Sistema Multi-idioma:** Interface disponível em **Inglês (padrão)** e **Português**, com troca dinâmica nas configurações.
 - **Tradução Flexível:** Escolha o idioma de destino para as traduções dos jogos (Inglês ou Português).
 - **Interface Otimizada:** Botão para ocultar/mostrar a barra lateral de filtros para focar na visualização dos jogos.
@@ -134,7 +133,7 @@ chmod +x update.sh
 - **Opção 1 (Normal):** Checa a versão no GitHub e só atualiza se houver uma nova.
 - **Opção 2 (Hard Update):** Força a reinstalação completa, baixando os arquivos mais recentes independente da versão atual.
 
-Aguarde o carregamento e acesse http://localhost ou http://vrsideforge.local para usar o app via navegador.
+Aguarde o carregamento e acesse http://localhost:3000 ou http://vrsideforge.local para usar o app via navegador.
 
 ### Configuração do qBitTorrent
 
@@ -182,9 +181,10 @@ Nota: Pode acontecer da instalação falhar por algum motivo, provavelmente o jo
 
 ## ☑️ To-Do (Lista de Tarefas) (Talvez)
 
+- [ ] Corrigir a função de ADB-Sideload.
 - [ ] Adicionar suporte a múltiplas fontes de indexação além do RuTracker.
+- [ ] ~~Talvez adicionar um downloader torrent nativo.~~ (Usando qBitTorrent Web UI ou outro cliente torrent)
 - [x] Suporte nativo a Linux.
-- [ ] Talvez adicionar um downloader torrent nativo.
 - [x] Sistema de auto-update via GitHub.
 - [x] Quebra de captcha do RuTracker completamente em segundo plano.
 - [x] Suporte multi-idioma global (Inglês/Português).
