@@ -250,7 +250,12 @@
       "noApps": "Nenhum pacote de terceiro encontrado.",
       "confirmUninstall": "Tem certeza que deseja desinstalar {}?",
       "uninstalled": "Aplicativo desinstalado com sucesso!",
-      "failUninstall": "Falha na desinstalação."
+      "failUninstall": "Falha na desinstalação.",
+      "systemAppWarn1": "[AVISO 1/5] O app '{}' pertence ao SISTEMA CORE. Removê-lo pode QUEBRAR o headset. Tem certeza?",
+      "systemAppWarn2": "[AVISO 2/5] O headset pode perder funções, loja ou entrar em loop infinito. Continuar?",
+      "systemAppWarn3": "[AVISO 3/5] A única forma de consertar pode ser um Factory Reset (formatar). Prosseguir?",
+      "systemAppWarn4": "[AVISO 4/5] Você tem certeza ABSOLUTA do que está fazendo com '{}'?",
+      "systemAppWarn5": "[AVISO 5/5] ÚLTIMO AVISO. A remoção não poderá ser desfeita. Confirmar EXCLUSÃO?"
     }
   },
   "auth": {

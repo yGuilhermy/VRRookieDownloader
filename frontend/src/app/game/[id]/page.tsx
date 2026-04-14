@@ -12,9 +12,18 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Languages, Download, ArrowLeft, ExternalLink, HardDriveDownload, ImageOff, Server, Pause, Play, Trash2, XCircle, Activity, RefreshCw, Info, Database, Heart, Smartphone } from 'lucide-react';
+import { Languages, Download, ArrowLeft, ExternalLink, HardDriveDownload, ImageOff, Server, Pause, Play, Trash2, XCircle, Activity, RefreshCw, Info, Database, Heart, Smartphone, CheckCircle2, AlertCircle, X, PackageSearch } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface GameDetail {
   id: number;
@@ -44,6 +53,17 @@ export default function GamePage() {
   const queryClient = useQueryClient();
   const { downloadPath } = useStore();
   const [showTranslated, setShowTranslated] = React.useState(true);
+  const [installProgress, setInstallProgress] = React.useState<{ 
+    current: number, 
+    total: number, 
+    percent: number, 
+    step?: number,
+    name?: string, 
+    message?: string,
+    completed?: boolean,
+    assetType?: 'apk' | 'obb'
+  } | null>(null);
+  const [finishedItem, setFinishedItem] = React.useState<{ name: string, success: boolean } | null>(null);
 
   const translateTag = (tag: string) => {
     const tagMap: Record<string, string> = {
@@ -105,10 +125,45 @@ export default function GamePage() {
   });
 
   React.useEffect(() => {
-    const socket = io();
+    const socketUrl = `${window.location.protocol}//${window.location.hostname}:4000`;
+    const socket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 5,
+    });
+
     
     socket.on('torrent_status_update', () => {
       queryClient.invalidateQueries({ queryKey: ['torrents'] });
+    });
+
+    socket.on('adb_event', (data: any) => {
+      if (data.type === 'progress') {
+        setInstallProgress({ 
+          total: data.total, 
+          current: data.current, 
+          percent: 0,
+          step: data.step,
+          name: data.currentName,
+          message: data.message,
+          assetType: data.assetType
+        });
+      } else if (data.type === 'finished') {
+        const itemName = data.folderPath ? data.folderPath.split(/[\\/]/).pop() : t('common.app');
+        
+        if (data.success) {
+          setInstallProgress(prev => prev ? { ...prev, completed: true, step: 3 } : null);
+          setTimeout(() => setInstallProgress(null), 5000);
+          toast.success(t('sideload.install.installed'));
+        } else {
+          setInstallProgress(null);
+          setFinishedItem({ name: itemName || t('common.app'), success: false });
+          toast.error(t('common.error') + ': ' + (t('sideload.install.fail') || 'Falha na instalação.'));
+        }
+        queryClient.invalidateQueries({ queryKey: ['adb-apps'] });
+      } else if (data.type === 'error') {
+        setInstallProgress(null);
+        toast.error(t('common.error') + ': ' + data.message);
+      }
     });
 
     return () => {
@@ -208,12 +263,26 @@ export default function GamePage() {
       const selectedDevice = devices.length > 0 ? devices[0] : null;
       if (!selectedDevice) throw new Error("Nenhum dispositivo VR detectado via USB.");
       
+      setInstallProgress({ 
+        total: 1, 
+        current: 0, 
+        percent: 0, 
+        name: localPathString.split(/[\\/]/).pop(), 
+        step: 1,
+        message: t('sideload.install.waiting') 
+      });
+
       const fullPath = `${downloadPath}/${localPathString}`;
       const res = await api.post('/adb/install', { folderPath: fullPath, deviceId: selectedDevice });
       return res.data;
     },
-    onSuccess: () => toast.success(t('sideload.install.installed')),
-    onError: (error: any) => toast.error(t('common.error') + ': ' + (error.response?.data?.error || error.message))
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adb-apps'] });
+    },
+    onError: (error: any) => {
+      setInstallProgress(null);
+      toast.error(t('common.error') + ': ' + (error.response?.data?.error || error.message));
+    }
   });
 
   if (isLoading) {
@@ -240,23 +309,98 @@ export default function GamePage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500 relative">
-      {/* Indicador de Instalação Global */}
-      {installMutation.isPending && (
+      {/* Global Sideloading Progress */}
+      {installProgress && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-10 pointer-events-none">
-          <Card className="bg-indigo-600/90 text-white backdrop-blur-md border-none shadow-2xl p-4 flex items-center gap-4 w-72">
-            <div className="bg-white/20 p-2 rounded-full">
-              <RefreshCw className="h-6 w-6 animate-spin" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-bold uppercase tracking-wider">{t('game.sideloading')}</p>
-              <p className="text-xs text-indigo-100/80">{t('game.installingOnQuest')}</p>
-              <div className="w-full bg-black/20 h-1.5 rounded-full mt-2 overflow-hidden">
-                <div className="bg-white h-full w-full animate-progress-loading origin-left"></div>
+          <Card className={`backdrop-blur-md shadow-2xl transition-all duration-500 border-2 w-80 ${
+            installProgress.completed 
+              ? 'border-emerald-500/50 bg-emerald-500/10 shadow-emerald-500/20' 
+              : 'border-indigo-500/50 bg-card/95 shadow-indigo-500/20'
+          }`}>
+            <CardContent className="p-4 flex flex-col gap-3">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1 overflow-hidden pointer-events-auto">
+                  <span className={`text-[10px] font-bold flex items-center gap-2 uppercase tracking-wider ${
+                    installProgress.completed ? 'text-emerald-400' : 'text-indigo-400'
+                  }`}>
+                    {installProgress.completed ? <CheckCircle2 className="h-3 w-3" /> : <PackageSearch className="h-3 w-3" />}
+                    {installProgress.completed 
+                      ? t('sideload.install.finishedTitle') 
+                      : (installProgress.assetType === 'obb' ? t('sideload.install.copying') : (installProgress.message || t('sideload.install.installing')))
+                    }
+                  </span>
+                </div>
+                {!installProgress.completed && (
+                  <RefreshCw className="h-3 w-3 animate-spin text-indigo-400" />
+                )}
               </div>
-            </div>
+
+              <div className="space-y-2">
+                <div className="flex flex-col gap-1">
+                  {installProgress.completed ? (
+                    <span className="text-md font-black text-emerald-400 animate-pulse">
+                      {t('sideload.install.installed')}
+                    </span>
+                  ) : installProgress.step && (
+                    <span className="text-md font-black text-indigo-400">
+                      {(() => {
+                        if (installProgress.assetType === 'obb') {
+                          return installProgress.step === 1 ? t('sideload.install.phase1Obb') : t('sideload.install.phase2').replace('3', '2');
+                        }
+                        return t(`sideload.install.phase${installProgress.step}`);
+                      })()}
+                    </span>
+                  )}
+                </div>
+                <div className="w-full bg-black/10 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 ${installProgress.completed ? 'bg-emerald-500' : 'bg-indigo-500 animate-pulse'}`}
+                    style={{ width: installProgress.completed ? '100%' : `${((installProgress.step || 1) / (installProgress.assetType === 'obb' ? 2 : 3)) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between items-center text-[9px] font-bold text-muted-foreground">
+                  <span>
+                    {installProgress.assetType === 'obb' ? t('sideload.install.obb') : t('common.app')} {installProgress.current + 1} / {installProgress.total}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
       )}
+
+      {/* Completion/Failure Alert */}
+      <AlertDialog open={!!finishedItem} onOpenChange={(open) => !open && setFinishedItem(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {finishedItem?.success ? (
+                <>
+                  <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                  {t('sideload.install.finishedTitle')}
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="h-6 w-6 text-rose-500" />
+                  {t('sideload.install.failTitle')}
+                </>
+              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {finishedItem ? (
+                finishedItem.success 
+                  ? t('sideload.install.successDesc', { name: finishedItem.name })
+                  : t('sideload.install.failDesc', { name: finishedItem.name })
+              ) : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setFinishedItem(null)} className={finishedItem?.success ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}>
+              {t('sideload.install.understood')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Link href="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors group">
         <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" /> {t('game.back')}

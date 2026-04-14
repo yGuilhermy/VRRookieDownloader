@@ -53,10 +53,15 @@ const localIps = getAllLocalIps();
 
 mDNS.on('query', (query: any) => {
   try {
-    if (query?.questions && query.questions.some((q: any) => q.name === 'vrsideforge.local')) {
+    const isOurHost = query?.questions && query.questions.some((q: any) => {
+      const name = q.name?.toLowerCase() || '';
+      return name === 'vrsideforge.local' || name === 'vrsideforge.local.';
+    });
+
+    if (isOurHost) {
       const records = localIps.map(ip => ({ name: 'vrsideforge.local', type: 'A' as const, data: ip }));
       mDNS.respond(records);
-      // console.log(`[mDNS] Responding for vrsideforge.local with ${localIps.join(', ')}`);
+      // console.log(`[mDNS] Sent A records for vrsideforge.local: ${localIps.join(', ')}`);
     }
   } catch (err) {
     console.error('[mDNS] Response Error:', err);

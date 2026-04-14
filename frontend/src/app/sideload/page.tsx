@@ -11,9 +11,11 @@ import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Smartphone, HardDrive, Trash2, DownloadCloud, RefreshCw, FolderDown, AlertCircle, Layers, CheckCircle2, PackageSearch, X } from 'lucide-react';
+import { Trash2, Smartphone, HardDrive, RefreshCw, FolderDown, Layers, Play, Settings, ChevronRight, History, AlertCircle, CheckCircle2, PackageSearch, X, DownloadCloud } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import Link from 'next/link';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +32,21 @@ interface LocalItem {
   isIndexed: boolean;
   status: 'predownload' | 'download' | 'concluido' | 'unindexed' | 'unknown';
 }
+
+const SYSTEM_APPS = [
+  'com.oculus.facebook',
+  'com.oculus.accountscenter',
+  'com.meta.shell.env.vista.central',
+  'com.meta.shell.env.footprint.haven2025',
+  'com.oculus.helpcenter',
+  'com.oculus.vrprivacycheckup',
+  'com.meta.handseducationmodule'
+];
+
+const isSystemApp = (pkg: string) => {
+  if (SYSTEM_APPS.includes(pkg)) return true;
+  return /^(com\.(oculus|meta|android)\.|android$)/i.test(pkg);
+};
 
 export default function SideloadPage() {
   const { t } = useTranslation();
@@ -531,16 +548,32 @@ const scanMutation = useMutation({
             </div>
           ) : deviceInfo?.apps && deviceInfo.apps.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 divide-y sm:divide-y-0 sm:gap-px bg-border/30">
-              {deviceInfo.apps.map(app => (
-                <div key={app} className="flex justify-between items-center bg-card p-4">
-                  <span className="font-mono text-xs truncate mr-4" title={app}>{app}</span>
+              {[...deviceInfo.apps]
+                .sort((a, b) => {
+                  const aSys = isSystemApp(a);
+                  const bSys = isSystemApp(b);
+                  if (aSys === bSys) return a.localeCompare(b);
+                  return aSys ? 1 : -1;
+                })
+                .map(app => {
+                const isSystem = isSystemApp(app);
+                return (
+                 <div key={app} className="flex justify-between items-center bg-card p-4">
+                  <span className={`font-mono text-xs truncate mr-4 ${isSystem ? 'text-rose-500 font-bold' : 'text-emerald-500'}`} title={app}>{app}</span>
                   <Button 
                     variant="destructive" 
                     size="icon"
                     className="h-8 w-8 shrink-0 hover:bg-rose-700"
                     onClick={() => {
-                      if (confirm(t('sideload.apps.confirmUninstall').replace('{}', app))) {
+                      if (isSystem) {
+                        for (let i = 1; i <= 5; i++) {
+                          if (!confirm(t(`sideload.apps.systemAppWarn${i}`).replace('{}', app))) return;
+                        }
                         uninstallMutation.mutate(app);
+                      } else {
+                        if (confirm(t('sideload.apps.confirmUninstall').replace('{}', app))) {
+                          uninstallMutation.mutate(app);
+                        }
                       }
                     }}
                     disabled={uninstallMutation.isPending}
@@ -548,7 +581,8 @@ const scanMutation = useMutation({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="p-8 text-center text-muted-foreground">

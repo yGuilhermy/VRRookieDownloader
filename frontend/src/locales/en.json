@@ -250,7 +250,12 @@
       "noApps": "No third-party packages found.",
       "confirmUninstall": "Do you really want to uninstall {}?",
       "uninstalled": "App uninstalled successfully!",
-      "failUninstall": "Failed to uninstall."
+      "failUninstall": "Failed to uninstall.",
+      "systemAppWarn1": "[WARNING 1/5] The app '{}' belongs to the CORE SYSTEM. Removing it can BREAK the headset. Are you sure?",
+      "systemAppWarn2": "[WARNING 2/5] The headset might lose features, the store, or get stuck in a bootloop. Continue?",
+      "systemAppWarn3": "[WARNING 3/5] The only way to fix this might be a Factory Reset. Proceed?",
+      "systemAppWarn4": "[WARNING 4/5] Are you ABSOLUTELY sure of what you are doing with '{}'?",
+      "systemAppWarn5": "[WARNING 5/5] LAST WARNING. The removal cannot be undone. Confirm DELETION?"
     }
   },
   "auth": {
